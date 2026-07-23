@@ -7,7 +7,7 @@ const INITIAL_SHOPS = [
     user_id: 'user-demo',
     name: 'Urban Streetwear Co.',
     slug: 'urban-vibes',
-    description: 'Exclusive streetwear drop & limited edition sneakers.',
+    description: 'Эксклюзивные дропы уличной одежды и лимитированных кроссовок.',
     theme_config: {
       primaryColor: '#0066ff',
       backgroundColor: '#090a0f',
@@ -15,11 +15,11 @@ const INITIAL_SHOPS = [
       cardBg: '#12141d',
       accentColor: '#38bdf8',
       font: 'Inter',
-      layout: 'grid', // 'grid' | 'list' | 'bento'
+      layout: 'grid',
       bannerUrl: 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=1200&q=80',
       logoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
       whatsapp: '+79990000000',
-      telegram: 'urbanvibes_admin'
+      telegram: 'reseller_admin'
     }
   },
   {
@@ -27,7 +27,7 @@ const INITIAL_SHOPS = [
     user_id: 'user-demo',
     name: 'Luxe Minimal Apparel',
     slug: 'luxe-store',
-    description: 'Curated premium minimalist wardrobe essentials.',
+    description: 'Премиальный минималистичный гардероб и качественные аксессуары.',
     theme_config: {
       primaryColor: '#10b981',
       backgroundColor: '#f8fafc',
@@ -39,7 +39,7 @@ const INITIAL_SHOPS = [
       bannerUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80',
       logoUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80',
       whatsapp: '+79991112233',
-      telegram: 'luxe_support'
+      telegram: 'luxe_reseller'
     }
   }
 ]
@@ -51,6 +51,8 @@ const INITIAL_PRODUCTS = [
     title: 'Oversized Acid-Wash Hoodie',
     price: 4900,
     size: 'S, M, L, XL',
+    category: 'Одежда',
+    brand: 'Supreme',
     image_url: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80',
     is_available: true
   },
@@ -60,6 +62,8 @@ const INITIAL_PRODUCTS = [
     title: 'Retro High-Top Sneakers (Edition 01)',
     price: 12500,
     size: '41, 42, 43, 44',
+    category: 'Обувь',
+    brand: 'Nike',
     image_url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80',
     is_available: true
   },
@@ -69,6 +73,8 @@ const INITIAL_PRODUCTS = [
     title: 'Minimalist Cargo Pants - Matte Black',
     price: 6800,
     size: 'M, L',
+    category: 'Одежда',
+    brand: 'Stone Island',
     image_url: 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=800&q=80',
     is_available: true
   },
@@ -78,6 +84,8 @@ const INITIAL_PRODUCTS = [
     title: 'Cyberpunk Graphics Heavy Tee',
     price: 3200,
     size: 'S, M, L',
+    category: 'Одежда',
+    brand: 'Palace',
     image_url: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80',
     is_available: true
   },
@@ -87,6 +95,8 @@ const INITIAL_PRODUCTS = [
     title: 'Cashmere Blend Minimalist Coat',
     price: 24000,
     size: 'S, M',
+    category: 'Одежда',
+    brand: 'Acne Studios',
     image_url: 'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?auto=format&fit=crop&w=800&q=80',
     is_available: true
   },
@@ -96,6 +106,8 @@ const INITIAL_PRODUCTS = [
     title: 'Italian Leather Everyday Tote',
     price: 18500,
     size: 'One Size',
+    category: 'Аксессуары',
+    brand: 'Bottega Veneta',
     image_url: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80',
     is_available: true
   }
@@ -114,7 +126,6 @@ export const useStore = create((set, get) => ({
   isLoading: false,
   error: null,
 
-  // Helper to persist state to local storage
   persist: () => {
     const { shops, products } = get()
     localStorage.setItem('creatiwise_shops', JSON.stringify(shops))
@@ -137,18 +148,26 @@ export const useStore = create((set, get) => ({
         set({ products })
       }
     } catch (e) {
-      console.warn('Supabase fetch failed, fallback to local state', e)
+      console.warn('Supabase fetch fallback', e)
     } finally {
       set({ isLoading: false })
     }
   },
 
-  // Shop actions
+  // Shop actions (automatic creation with no setup needed)
   createShop: async (newShop) => {
+    const formattedSlug = (newShop.slug || newShop.name.toLowerCase())
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, '-')
+      .replace(/-+/g, '-')
+
     const shopWithId = {
       id: 'shop-' + Date.now(),
-      user_id: 'user-demo',
+      user_id: 'user-' + Date.now(),
       created_at: new Date().toISOString(),
+      name: newShop.name,
+      slug: formattedSlug,
+      description: newShop.description || 'Кастомная витрина товаров',
       theme_config: {
         primaryColor: '#0066ff',
         backgroundColor: '#090a0f',
@@ -158,10 +177,9 @@ export const useStore = create((set, get) => ({
         layout: 'grid',
         bannerUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80',
         logoUrl: '',
-        whatsapp: '',
-        telegram: ''
-      },
-      ...newShop
+        whatsapp: newShop.whatsapp || '',
+        telegram: newShop.telegram || 'seller_admin'
+      }
     }
 
     set((state) => ({
@@ -218,6 +236,8 @@ export const useStore = create((set, get) => ({
     const productWithId = {
       id: 'prod-' + Date.now(),
       is_available: true,
+      category: newProduct.category || 'Общее',
+      brand: newProduct.brand || 'Без бренда',
       ...newProduct
     }
 

@@ -9,19 +9,17 @@ import {
   Palette,
   ExternalLink,
   Save,
-  Database,
   Check,
   Copy,
-  LayoutGrid,
-  List,
   Eye,
   X,
-  PhoneCall,
   Send,
-  Image as ImageIcon
+  Sparkles,
+  Share2,
+  Tag,
+  Layers
 } from 'lucide-react'
 import { useStore } from '../store/useStore'
-import { SUPABASE_SQL_SCHEMA, isConfigured } from '../lib/supabase'
 
 export function AdminPage() {
   const navigate = useNavigate()
@@ -38,11 +36,11 @@ export function AdminPage() {
     deleteProduct
   } = useStore()
 
-  const [activeTab, setActiveTab] = useState('products') // 'products' | 'theme' | 'shops' | 'sql'
+  const [activeTab, setActiveTab] = useState('products') // 'products' | 'theme' | 'shops'
   const [showProductModal, setShowProductModal] = useState(false)
   const [showShopModal, setShowShopModal] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
-  const [copiedSql, setCopiedSql] = useState(false)
+  const [copiedLink, setCopiedLink] = useState(false)
 
   // Current selected shop
   const activeShop = shops.find((s) => s.id === activeShopId) || shops[0]
@@ -53,6 +51,8 @@ export function AdminPage() {
     title: '',
     price: '',
     size: 'S, M, L',
+    category: 'Одежда',
+    brand: '',
     image_url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80',
     is_available: true
   })
@@ -61,7 +61,8 @@ export function AdminPage() {
   const [shopForm, setShopForm] = useState({
     name: '',
     slug: '',
-    description: ''
+    description: '',
+    telegram: ''
   })
 
   // Theme Form State
@@ -76,11 +77,10 @@ export function AdminPage() {
       bannerUrl: '',
       logoUrl: '',
       whatsapp: '',
-      telegram: ''
+      telegram: 'reseller_admin'
     }
   )
 
-  // Open product modal for edit or create
   const handleOpenProductModal = (product = null) => {
     if (product) {
       setEditingProduct(product)
@@ -88,6 +88,8 @@ export function AdminPage() {
         title: product.title,
         price: product.price,
         size: product.size || '',
+        category: product.category || 'Одежда',
+        brand: product.brand || '',
         image_url: product.image_url || '',
         is_available: product.is_available
       })
@@ -97,6 +99,8 @@ export function AdminPage() {
         title: '',
         price: '',
         size: 'S, M, L',
+        category: 'Одежда',
+        brand: 'Nike',
         image_url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80',
         is_available: true
       })
@@ -119,6 +123,8 @@ export function AdminPage() {
         title: prodForm.title,
         price: parseFloat(prodForm.price) || 0,
         size: prodForm.size,
+        category: prodForm.category,
+        brand: prodForm.brand,
         image_url: prodForm.image_url,
         is_available: prodForm.is_available
       })
@@ -129,34 +135,42 @@ export function AdminPage() {
   const handleSaveShopTheme = (e) => {
     e.preventDefault()
     if (!activeShop) return
-    updateShop(activeShop.id, { theme_config: themeForm })
-    alert('Theme settings updated successfully!')
+    // Clean telegram username (remove @)
+    const cleanTg = (themeForm.telegram || '').replace('@', '').trim()
+    const updatedTheme = { ...themeForm, telegram: cleanTg }
+
+    updateShop(activeShop.id, { theme_config: updatedTheme })
+    setThemeForm(updatedTheme)
+    alert('Настройки витрины и Telegram для заказов сохранены!')
   }
 
   const handleCreateShop = (e) => {
     e.preventDefault()
-    if (!shopForm.name || !shopForm.slug) return
-    const formattedSlug = shopForm.slug.toLowerCase().replace(/[^a-z0-9-]/g, '-')
-    createShop({
+    if (!shopForm.name) return
+    const cleanTg = (shopForm.telegram || '').replace('@', '').trim()
+    const newCreated = createShop({
       name: shopForm.name,
-      slug: formattedSlug,
-      description: shopForm.description
+      slug: shopForm.slug,
+      description: shopForm.description,
+      telegram: cleanTg
     })
     setShowShopModal(false)
-    setShopForm({ name: '', slug: '', description: '' })
+    setShopForm({ name: '', slug: '', description: '', telegram: '' })
   }
 
-  const copySqlToClipboard = () => {
-    navigator.clipboard.writeText(SUPABASE_SQL_SCHEMA)
-    setCopiedSql(true)
-    setTimeout(() => setCopiedSql(false), 3000)
+  const copyShopUrl = () => {
+    if (!activeShop) return
+    const fullUrl = `${window.location.origin}${window.location.pathname}#/s/${activeShop.slug}`
+    navigator.clipboard.writeText(fullUrl)
+    setCopiedLink(true)
+    setTimeout(() => setCopiedLink(false), 2500)
   }
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 font-sans flex flex-col">
       
       {/* Admin Top Header */}
-      <header className="bg-slate-800/80 backdrop-blur-md border-b border-slate-700 sticky top-9 z-40 px-4 sm:px-6 py-4">
+      <header className="bg-slate-800/90 backdrop-blur-md border-b border-slate-700 sticky top-0 z-40 px-4 sm:px-6 py-4">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           
           <div className="flex items-center gap-3">
@@ -164,12 +178,12 @@ export function AdminPage() {
               <Store className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-xl font-bold font-display text-white">Reseller Control Dashboard</h1>
-              <p className="text-xs text-slate-400">Manage products, custom storefronts & branding</p>
+              <h1 className="text-xl font-bold font-display text-white">Кабинет Ресейлера</h1>
+              <p className="text-xs text-slate-400">Автоматическое создание витрин и прием заказов в Telegram</p>
             </div>
           </div>
 
-          {/* Active Shop Switcher & Quick Preview */}
+          {/* Active Shop Switcher & Quick Public Store Link */}
           <div className="flex items-center gap-3">
             <select
               value={activeShopId}
@@ -189,22 +203,20 @@ export function AdminPage() {
 
             <button
               onClick={() => setShowShopModal(true)}
-              className="p-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-slate-200 transition-colors"
-              title="Add New Shop"
+              className="inline-flex items-center gap-1 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold shadow-sm transition-all"
             >
               <Plus className="w-4 h-4" />
+              <span>Новый магазин</span>
             </button>
 
             {activeShop && (
-              <a
-                href={`#/s/${activeShop.slug}`}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition-all shadow-md"
+              <button
+                onClick={() => navigate(`/s/${activeShop.slug}`)}
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition-all shadow-md"
               >
                 <Eye className="w-3.5 h-3.5" />
-                <span>Open Showcase</span>
-              </a>
+                <span>Открыть Витрину</span>
+              </button>
             )}
           </div>
 
@@ -214,27 +226,40 @@ export function AdminPage() {
       {/* Main Admin Body */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 w-full flex-grow">
         
-        {/* Supabase Status Banner */}
-        <div className="mb-6 p-4 rounded-2xl bg-slate-800/60 border border-slate-700 flex items-center justify-between flex-wrap gap-3">
-          <div className="flex items-center gap-3">
-            <div className={`w-3 h-3 rounded-full ${isConfigured ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></div>
-            <span className="text-xs sm:text-sm font-medium">
-              {isConfigured ? (
-                <span className="text-emerald-400 font-semibold">Supabase Connected: Live PostgreSQL Database Active</span>
-              ) : (
-                <span className="text-amber-300">Demo Standalone Mode: Local DB active. (Add Supabase URL & Key to .env to sync backend)</span>
-              )}
-            </span>
-          </div>
+        {/* Quick Link Share Banner */}
+        {activeShop && (
+          <div className="mb-6 p-4 rounded-2xl bg-slate-800/90 border border-blue-500/30 flex items-center justify-between flex-wrap gap-4 shadow-lg">
+            <div className="space-y-1">
+              <div className="text-xs text-blue-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4" />
+                <span>Ссылка на вашу витрину для покупателей:</span>
+              </div>
+              <div className="text-sm font-mono font-bold text-white">
+                {window.location.origin}{window.location.pathname}#/s/{activeShop.slug}
+              </div>
+            </div>
 
-          <button
-            onClick={() => setActiveTab('sql')}
-            className="text-xs font-semibold text-blue-400 hover:text-blue-300 underline flex items-center gap-1"
-          >
-            <Database className="w-3.5 h-3.5" />
-            View SQL Schema
-          </button>
-        </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={copyShopUrl}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition-all shadow-md"
+              >
+                {copiedLink ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                <span>{copiedLink ? 'Ссылка скопирована!' : 'Скопировать ссылку'}</span>
+              </button>
+
+              <a
+                href={`#/s/${activeShop.slug}`}
+                target="_blank"
+                rel="noreferrer"
+                className="p-2 text-slate-300 hover:text-white bg-slate-700 hover:bg-slate-600 rounded-xl"
+                title="Открыть в новой вкладке"
+              >
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            </div>
+          </div>
+        )}
 
         {/* Tab Navigation */}
         <div className="flex border-b border-slate-800 mb-8 space-x-6">
@@ -247,7 +272,7 @@ export function AdminPage() {
             }`}
           >
             <Package className="w-4 h-4" />
-            <span>Products ({shopProducts.length})</span>
+            <span>Товары ({shopProducts.length})</span>
           </button>
 
           <button
@@ -259,7 +284,7 @@ export function AdminPage() {
             }`}
           >
             <Palette className="w-4 h-4" />
-            <span>Design & Theme</span>
+            <span>Настройка Telegram и Дизайна</span>
           </button>
 
           <button
@@ -271,19 +296,7 @@ export function AdminPage() {
             }`}
           >
             <Store className="w-4 h-4" />
-            <span>Shops List ({shops.length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('sql')}
-            className={`pb-4 px-2 text-sm font-semibold flex items-center gap-2 border-b-2 transition-colors ${
-              activeTab === 'sql'
-                ? 'border-blue-500 text-blue-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Database className="w-4 h-4" />
-            <span>Supabase SQL</span>
+            <span>Мои магазины ({shops.length})</span>
           </button>
         </div>
 
@@ -292,16 +305,16 @@ export function AdminPage() {
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-bold text-white">Product Inventory for "{activeShop?.name}"</h2>
-                <p className="text-xs text-slate-400">Add products with title, price, sizes, photos & availability</p>
+                <h2 className="text-xl font-bold text-white">Каталог товаров "{activeShop?.name}"</h2>
+                <p className="text-xs text-slate-400">Добавляйте товары с ценой, размерами, брендами и категориями</p>
               </div>
 
               <button
                 onClick={() => handleOpenProductModal()}
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl transition-all shadow-md"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition-all shadow-md"
               >
                 <Plus className="w-4 h-4" />
-                <span>Add Product</span>
+                <span>Добавить товар</span>
               </button>
             </div>
 
@@ -309,15 +322,15 @@ export function AdminPage() {
             {shopProducts.length === 0 ? (
               <div className="text-center py-16 bg-slate-800/40 rounded-3xl border border-dashed border-slate-700">
                 <Package className="w-12 h-12 text-slate-500 mx-auto mb-3" />
-                <h3 className="text-base font-semibold text-slate-300">No products in this shop yet</h3>
+                <h3 className="text-base font-semibold text-slate-300">В этом магазине пока нет товаров</h3>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-4">
-                  Start building your storefront by adding items with images, pricing, and available sizes.
+                  Нажмите кнопку ниже, чтобы добавить первый товар.
                 </p>
                 <button
                   onClick={() => handleOpenProductModal()}
-                  className="px-4 py-2 text-xs font-semibold bg-blue-600 text-white rounded-xl"
+                  className="px-5 py-2.5 text-xs font-bold bg-blue-600 text-white rounded-xl shadow-md"
                 >
-                  Create First Product
+                  Добавить первый товар
                 </button>
               </div>
             ) : (
@@ -339,21 +352,32 @@ export function AdminPage() {
                             prod.is_available ? 'bg-emerald-500/90 text-white' : 'bg-red-500/90 text-white'
                           }`}
                         >
-                          {prod.is_available ? 'In Stock' : 'Out of Stock'}
+                          {prod.is_available ? 'В наличии' : 'Распродано'}
                         </span>
+
+                        {prod.brand && (
+                          <span className="absolute bottom-3 left-3 text-[10px] font-bold px-2 py-0.5 rounded bg-black/70 backdrop-blur-md text-white border border-white/10">
+                            {prod.brand}
+                          </span>
+                        )}
                       </div>
 
                       <div className="p-4 space-y-2">
+                        <div className="text-[11px] text-blue-400 font-semibold uppercase tracking-wider">
+                          {prod.category || 'Одежда'}
+                        </div>
+
                         <h3 className="font-bold text-white text-base leading-snug line-clamp-1">
                           {prod.title}
                         </h3>
-                        <div className="flex items-center justify-between text-xs text-slate-400">
+
+                        <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
                           <span className="font-extrabold text-white text-base font-display">
                             {prod.price.toLocaleString('ru-RU')} ₽
                           </span>
                           {prod.size && (
                             <span className="bg-slate-700/80 px-2 py-0.5 rounded text-[11px] text-slate-300">
-                              Sizes: {prod.size}
+                              {prod.size}
                             </span>
                           )}
                         </div>
@@ -364,18 +388,18 @@ export function AdminPage() {
                       <button
                         onClick={() => handleOpenProductModal(prod)}
                         className="p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-700/50 rounded-lg transition-colors"
-                        title="Edit"
+                        title="Редактировать"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => {
-                          if (window.confirm(`Delete "${prod.title}"?`)) {
+                          if (window.confirm(`Удалить "${prod.title}"?`)) {
                             deleteProduct(prod.id)
                           }
                         }}
                         className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-700/50 rounded-lg transition-colors"
-                        title="Delete"
+                        title="Удалить"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -387,21 +411,59 @@ export function AdminPage() {
           </div>
         )}
 
-        {/* TAB 2: THEME & DESIGN CONFIGURATION */}
+        {/* TAB 2: THEME & TELEGRAM CONFIGURATION */}
         {activeTab === 'theme' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
             {/* Left Form */}
             <form onSubmit={handleSaveShopTheme} className="lg:col-span-7 bg-slate-800 p-6 rounded-3xl border border-slate-700 space-y-6">
               <div>
-                <h2 className="text-xl font-bold text-white">Storefront Customization</h2>
-                <p className="text-xs text-slate-400">Customize colors, branding logo, banner & contact details for /{activeShop?.slug}</p>
+                <h2 className="text-xl font-bold text-white">Прием заказов и Оформление витрины</h2>
+                <p className="text-xs text-slate-400">Укажите ваш Telegram для получения заказов напрямую от клиентов</p>
+              </div>
+
+              {/* TELEGRAM USERNAME HIGHLIGHTED */}
+              <div className="bg-blue-600/10 border border-blue-500/40 p-4 rounded-2xl space-y-2">
+                <label className="block text-xs font-bold text-blue-300 flex items-center gap-1.5">
+                  <Send className="w-4 h-4 text-blue-400" />
+                  <span>Ваш Юзернейм в Telegram для приема заказов:</span>
+                </label>
+                <div className="flex items-center">
+                  <span className="text-xs text-slate-400 bg-slate-900 px-3 py-2.5 rounded-l-xl border border-r-0 border-slate-700 font-mono">
+                    @
+                  </span>
+                  <input
+                    type="text"
+                    required
+                    value={themeForm.telegram || ''}
+                    onChange={(e) => setThemeForm({ ...themeForm, telegram: e.target.value })}
+                    className="bg-slate-900 border border-slate-700 text-xs text-white rounded-r-xl px-3 py-2.5 flex-1 font-semibold"
+                    placeholder="reseller_admin"
+                  />
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  Когда покупатель нажмет "Купить" на вашей витрине, откроется диалог в Telegram с сообщением вида:
+                  <br />
+                  <i className="text-blue-300 font-mono">"Привет! Хочу заказать [Название Товара]..."</i>
+                </p>
+              </div>
+
+              {/* WhatsApp Optional */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">WhatsApp (Необязательно)</label>
+                <input
+                  type="text"
+                  value={themeForm.whatsapp || ''}
+                  onChange={(e) => setThemeForm({ ...themeForm, whatsapp: e.target.value })}
+                  className="bg-slate-900 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                  placeholder="+79991234567"
+                />
               </div>
 
               {/* Color Palette */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Primary Color</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Основной цвет витрины</label>
                   <div className="flex items-center gap-2">
                     <input
                       type="color"
@@ -419,7 +481,7 @@ export function AdminPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Background Color</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Цвет фона витрины</label>
                   <div className="flex items-center gap-2">
                     <input
                       type="color"
@@ -434,40 +496,13 @@ export function AdminPage() {
                       className="bg-slate-900 border border-slate-700 text-xs text-white rounded-xl px-3 py-2 flex-1"
                     />
                   </div>
-                </div>
-              </div>
-
-              {/* Card & Font Settings */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Card Background</label>
-                  <input
-                    type="text"
-                    value={themeForm.cardBg || '#12141d'}
-                    onChange={(e) => setThemeForm({ ...themeForm, cardBg: e.target.value })}
-                    className="bg-slate-900 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
-                    placeholder="#12141d or white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Font Family</label>
-                  <select
-                    value={themeForm.font || 'Inter'}
-                    onChange={(e) => setThemeForm({ ...themeForm, font: e.target.value })}
-                    className="bg-slate-900 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
-                  >
-                    <option value="Inter">Inter (Grotesque)</option>
-                    <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
-                    <option value="Caveat">Caveat (Handwritten)</option>
-                  </select>
                 </div>
               </div>
 
               {/* Banner & Logo URLs */}
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Banner Image URL</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">URL Шапки / Баннера витрины</label>
                   <input
                     type="url"
                     value={themeForm.bannerUrl || ''}
@@ -478,7 +513,7 @@ export function AdminPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Shop Avatar/Logo URL</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">URL Логотипа / Аватарки магазина</label>
                   <input
                     type="url"
                     value={themeForm.logoUrl || ''}
@@ -489,37 +524,12 @@ export function AdminPage() {
                 </div>
               </div>
 
-              {/* Contact Handles */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Telegram Username</label>
-                  <input
-                    type="text"
-                    value={themeForm.telegram || ''}
-                    onChange={(e) => setThemeForm({ ...themeForm, telegram: e.target.value })}
-                    className="bg-slate-900 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
-                    placeholder="username (without @)"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">WhatsApp Number</label>
-                  <input
-                    type="text"
-                    value={themeForm.whatsapp || ''}
-                    onChange={(e) => setThemeForm({ ...themeForm, whatsapp: e.target.value })}
-                    className="bg-slate-900 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
-                    placeholder="+79991234567"
-                  />
-                </div>
-              </div>
-
               <button
                 type="submit"
                 className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition-all shadow-md"
               >
                 <Save className="w-4 h-4" />
-                <span>Save Theme Settings</span>
+                <span>Сохранить настройки Telegram и дизайна</span>
               </button>
             </form>
 
@@ -527,7 +537,7 @@ export function AdminPage() {
             <div className="lg:col-span-5 space-y-4">
               <h3 className="text-sm font-bold text-white flex items-center gap-2">
                 <Eye className="w-4 h-4 text-blue-400" />
-                <span>Live Mobile Preview</span>
+                <span>Предпросмотр на смартфоне</span>
               </h3>
 
               <div className="mx-auto w-[320px] h-[580px] bg-slate-950 rounded-[3rem] p-3 border-4 border-slate-700 shadow-2xl relative overflow-hidden flex flex-col">
@@ -540,7 +550,6 @@ export function AdminPage() {
                     color: themeForm.textColor || '#ffffff'
                   }}
                 >
-                  {/* Banner & Logo */}
                   <div className="relative rounded-2xl h-24 overflow-hidden bg-slate-800">
                     {themeForm.bannerUrl && (
                       <img src={themeForm.bannerUrl} alt="Banner" className="w-full h-full object-cover" />
@@ -554,15 +563,18 @@ export function AdminPage() {
                     </div>
                   </div>
 
-                  {/* Shop Info */}
                   <div className="pt-2">
-                    <h4 className="font-bold text-base leading-tight" style={{ color: themeForm.textColor }}>
+                    <h4 className="font-bold text-base leading-tight">
                       {activeShop?.name}
                     </h4>
                     <p className="text-[11px] opacity-75 line-clamp-2 mt-1">{activeShop?.description}</p>
+                    {themeForm.telegram && (
+                      <div className="text-[10px] text-blue-400 mt-1 font-mono">
+                        Заказы: @{themeForm.telegram.replace('@', '')}
+                      </div>
+                    )}
                   </div>
 
-                  {/* Product Cards Grid Preview */}
                   <div className="grid grid-cols-2 gap-2 pt-2">
                     {shopProducts.slice(0, 4).map((p) => (
                       <div
@@ -590,16 +602,16 @@ export function AdminPage() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold text-white">Your Registered Storefronts</h2>
-                <p className="text-xs text-slate-400">Manage multiple link-in-bio storefronts from a single account</p>
+                <h2 className="text-xl font-bold text-white">Список ваших магазинов</h2>
+                <p className="text-xs text-slate-400">Создавайте несколько разных витрин под разные бренды и ниши</p>
               </div>
 
               <button
                 onClick={() => setShowShopModal(true)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl transition-all shadow-md"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition-all shadow-md"
               >
                 <Plus className="w-4 h-4" />
-                <span>Create New Shop</span>
+                <span>Создать новый магазин</span>
               </button>
             </div>
 
@@ -614,12 +626,12 @@ export function AdminPage() {
                     }`}
                   >
                     <div className="flex items-center justify-between mb-4">
-                      <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-700 text-slate-300">
+                      <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-700 text-slate-300 font-mono">
                         /{s.slug}
                       </span>
                       {s.id === activeShopId && (
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-600 text-white">
-                          ACTIVE
+                          АКТИВЕН
                         </span>
                       )}
                     </div>
@@ -627,8 +639,11 @@ export function AdminPage() {
                     <h3 className="text-lg font-bold text-white mb-1 font-display">{s.name}</h3>
                     <p className="text-xs text-slate-400 line-clamp-2 mb-4">{s.description}</p>
 
-                    <div className="text-xs text-slate-400 mb-6 font-medium">
-                      📦 {count} Products listed
+                    <div className="text-xs text-slate-300 mb-6 flex items-center justify-between font-medium">
+                      <span>📦 Товаров: {count}</span>
+                      <span className="text-blue-400 font-mono">
+                        @{s.theme_config?.telegram || 'не указан'}
+                      </span>
                     </div>
 
                     <div className="flex items-center justify-between gap-2 pt-4 border-t border-slate-700">
@@ -636,7 +651,7 @@ export function AdminPage() {
                         onClick={() => setActiveShopId(s.id)}
                         className="text-xs font-semibold px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
                       >
-                        Select
+                        Выбрать
                       </button>
 
                       <a
@@ -645,7 +660,7 @@ export function AdminPage() {
                         rel="noreferrer"
                         className="text-xs font-semibold px-3 py-1.5 bg-emerald-600/90 hover:bg-emerald-500 text-white rounded-lg flex items-center gap-1"
                       >
-                        <span>Visit Store</span>
+                        <span>Открыть витрину</span>
                         <ExternalLink className="w-3 h-3" />
                       </a>
                     </div>
@@ -656,44 +671,15 @@ export function AdminPage() {
           </div>
         )}
 
-        {/* TAB 4: SUPABASE SQL SCHEMA EXPORTER */}
-        {activeTab === 'sql' && (
-          <div className="bg-slate-800 p-6 rounded-3xl border border-slate-700 space-y-4">
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div>
-                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                  <Database className="w-5 h-5 text-blue-400" />
-                  <span>Supabase PostgreSQL Migration Script</span>
-                </h2>
-                <p className="text-xs text-slate-400">
-                  Copy & paste this script into your Supabase Dashboard SQL Editor to initialize `shops` & `products` tables
-                </p>
-              </div>
-
-              <button
-                onClick={copySqlToClipboard}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition-all shadow-md"
-              >
-                {copiedSql ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                <span>{copiedSql ? 'Copied to Clipboard!' : 'Copy SQL Script'}</span>
-              </button>
-            </div>
-
-            <pre className="bg-slate-950 p-4 rounded-2xl text-slate-300 text-xs font-mono overflow-x-auto border border-slate-800 max-h-[450px]">
-              {SUPABASE_SQL_SCHEMA}
-            </pre>
-          </div>
-        )}
-
       </div>
 
-      {/* PRODUCT MODAL */}
+      {/* PRODUCT MODAL WITH BRAND & CATEGORY */}
       {showProductModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-slate-800 border border-slate-700 rounded-3xl max-w-lg w-full p-6 space-y-6 shadow-2xl relative animate-in fade-in zoom-in duration-200">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-white font-display">
-                {editingProduct ? 'Edit Product' : 'Add New Product'}
+                {editingProduct ? 'Редактировать товар' : 'Добавить новый товар'}
               </h3>
               <button
                 onClick={() => setShowProductModal(false)}
@@ -705,20 +691,48 @@ export function AdminPage() {
 
             <form onSubmit={handleSaveProduct} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Product Title</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Название товара</label>
                 <input
                   type="text"
                   required
                   value={prodForm.title}
                   onChange={(e) => setProdForm({ ...prodForm, title: e.target.value })}
                   className="bg-slate-900 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
-                  placeholder="e.g. Oversized Acid-Wash Hoodie"
+                  placeholder="Например: Oversized Acid-Wash Hoodie"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Price (₽)</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Категория</label>
+                  <select
+                    value={prodForm.category}
+                    onChange={(e) => setProdForm({ ...prodForm, category: e.target.value })}
+                    className="bg-slate-900 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                  >
+                    <option value="Одежда">Одежда</option>
+                    <option value="Обувь">Обувь</option>
+                    <option value="Аксессуары">Аксессуары</option>
+                    <option value="Электроника">Электроника</option>
+                    <option value="Другое">Другое</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Бренд (Производитель)</label>
+                  <input
+                    type="text"
+                    value={prodForm.brand}
+                    onChange={(e) => setProdForm({ ...prodForm, brand: e.target.value })}
+                    className="bg-slate-900 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                    placeholder="Nike, Supreme..."
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Цена (₽)</label>
                   <input
                     type="number"
                     required
@@ -730,7 +744,7 @@ export function AdminPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Available Sizes</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Доступные размеры</label>
                   <input
                     type="text"
                     value={prodForm.size}
@@ -742,7 +756,7 @@ export function AdminPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Image URL</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">URL Фотографии товара</label>
                 <input
                   type="url"
                   required
@@ -762,7 +776,7 @@ export function AdminPage() {
                   className="w-4 h-4 rounded text-blue-600 bg-slate-900 border-slate-700"
                 />
                 <label htmlFor="avail" className="text-xs font-medium text-slate-300">
-                  Item is Available in Stock
+                  Товар в наличии в магазине
                 </label>
               </div>
 
@@ -772,13 +786,13 @@ export function AdminPage() {
                   onClick={() => setShowProductModal(false)}
                   className="px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 rounded-xl"
                 >
-                  Cancel
+                  Отмена
                 </button>
                 <button
                   type="submit"
                   className="px-5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-md"
                 >
-                  Save Product
+                  Сохранить товар
                 </button>
               </div>
             </form>
@@ -786,12 +800,12 @@ export function AdminPage() {
         </div>
       )}
 
-      {/* CREATE SHOP MODAL */}
+      {/* INSTANT SHOP CREATION MODAL */}
       {showShopModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-slate-800 border border-slate-700 rounded-3xl max-w-md w-full p-6 space-y-6 shadow-2xl relative">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white font-display">Create New Showcase Store</h3>
+              <h3 className="text-lg font-bold text-white font-display">Создать витрину за 1 минуту</h3>
               <button onClick={() => setShowShopModal(false)} className="p-1 text-slate-400 hover:text-white">
                 <X className="w-5 h-5" />
               </button>
@@ -799,21 +813,21 @@ export function AdminPage() {
 
             <form onSubmit={handleCreateShop} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Store Name</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Название магазина</label>
                 <input
                   type="text"
                   required
                   value={shopForm.name}
                   onChange={(e) => setShopForm({ ...shopForm, name: e.target.value })}
                   className="bg-slate-900 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
-                  placeholder="e.g. Vintage Apparel Lab"
+                  placeholder="Например: Streetwear Lab"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">URL Slug</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">URL слаг (адрес витрины)</label>
                 <div className="flex items-center">
-                  <span className="text-xs text-slate-500 bg-slate-950 px-3 py-2.5 rounded-l-xl border border-r-0 border-slate-700">
+                  <span className="text-xs text-slate-500 bg-slate-950 px-3 py-2.5 rounded-l-xl border border-r-0 border-slate-700 font-mono">
                     /#/s/
                   </span>
                   <input
@@ -821,19 +835,39 @@ export function AdminPage() {
                     required
                     value={shopForm.slug}
                     onChange={(e) => setShopForm({ ...shopForm, slug: e.target.value })}
-                    className="bg-slate-900 border border-slate-700 text-xs text-white rounded-r-xl px-3 py-2.5 flex-1"
-                    placeholder="vintage-lab"
+                    className="bg-slate-900 border border-slate-700 text-xs text-white rounded-r-xl px-3 py-2.5 flex-1 font-mono"
+                    placeholder="streetwear-lab"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Short Description</label>
+                <label className="block text-xs font-bold text-blue-400 mb-1 flex items-center gap-1">
+                  <Send className="w-3.5 h-3.5" />
+                  <span>Ваш Telegram username для приема заказов</span>
+                </label>
+                <div className="flex items-center">
+                  <span className="text-xs text-slate-500 bg-slate-950 px-3 py-2.5 rounded-l-xl border border-r-0 border-slate-700 font-mono">
+                    @
+                  </span>
+                  <input
+                    type="text"
+                    required
+                    value={shopForm.telegram}
+                    onChange={(e) => setShopForm({ ...shopForm, telegram: e.target.value })}
+                    className="bg-slate-900 border border-slate-700 text-xs text-white rounded-r-xl px-3 py-2.5 flex-1 font-semibold"
+                    placeholder="your_telegram_username"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Краткое описание</label>
                 <textarea
                   value={shopForm.description}
                   onChange={(e) => setShopForm({ ...shopForm, description: e.target.value })}
                   className="bg-slate-900 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full h-20"
-                  placeholder="Tell customers what your store offers..."
+                  placeholder="Опишите, какие товары вы продаете..."
                 />
               </div>
 
@@ -843,13 +877,13 @@ export function AdminPage() {
                   onClick={() => setShowShopModal(false)}
                   className="px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 rounded-xl"
                 >
-                  Cancel
+                  Отмена
                 </button>
                 <button
                   type="submit"
                   className="px-5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-md"
                 >
-                  Create Storefront
+                  Создать витрину
                 </button>
               </div>
             </form>
