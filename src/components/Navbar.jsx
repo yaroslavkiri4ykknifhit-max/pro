@@ -1,16 +1,16 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Menu, X, ArrowUpRight, Shield } from 'lucide-react'
+import { Menu, X, Shield, Sparkles } from 'lucide-react'
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const navLinks = [
-    { name: 'Home', href: '#' },
-    { name: 'About us', href: '#about' },
-    { name: 'How we work', href: '#how-we-work' },
-    { name: 'Services', href: '#services' },
-    { name: 'Portfolio', href: '#portfolio' },
+    { name: 'Главная', href: '#' },
+    { name: 'О платформе', href: '#about' },
+    { name: 'Как это работает', href: '#how-we-work' },
+    { name: 'Возможности', href: '#services' },
+    { name: 'Шаблоны витрин', href: '#portfolio' },
   ]
 
   return (
@@ -41,16 +41,16 @@ export function Navbar() {
         <div className="hidden md:flex items-center gap-3">
           <Link
             to="/admin"
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full transition-all"
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-full transition-all shadow-sm"
           >
             <Shield className="w-3.5 h-3.5" />
-            Reseller Panel
+            Конструктор Витрин
           </Link>
           <a
             href="#contact"
             className="inline-flex items-center justify-center px-6 py-2.5 text-sm font-semibold text-white bg-black hover:bg-slate-800 rounded-full transition-all duration-200 shadow-sm"
           >
-            Contact Us
+            Создать Витрину
           </a>
         </div>
 
@@ -58,9 +58,9 @@ export function Navbar() {
         <div className="md:hidden flex items-center gap-2">
           <Link
             to="/admin"
-            className="px-3 py-1.5 text-xs font-medium bg-black text-white rounded-full"
+            className="px-3 py-1.5 text-xs font-bold bg-blue-600 text-white rounded-full"
           >
-            Admin
+            Конструктор
           </Link>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -90,17 +90,10 @@ export function Navbar() {
             <Link
               to="/admin"
               onClick={() => setMobileMenuOpen(false)}
-              className="w-full text-center px-5 py-3 text-sm font-semibold text-slate-800 bg-slate-100 rounded-full"
+              className="w-full text-center px-5 py-3 text-sm font-bold text-white bg-blue-600 rounded-full"
             >
-              Reseller Admin Panel
+              Открыть Кабинет Ресейлера
             </Link>
-            <a
-              href="#contact"
-              onClick={() => setMobileMenuOpen(false)}
-              className="w-full text-center px-5 py-3 text-sm font-semibold text-white bg-black rounded-full"
-            >
-              Contact Us
-            </a>
           </div>
         </div>
       )}

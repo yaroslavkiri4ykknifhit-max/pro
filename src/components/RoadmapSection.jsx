@@ -4,35 +4,27 @@ export function RoadmapSection() {
   const steps = [
     {
       number: '01',
-      title: 'Define',
-      desc: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos.',
+      title: 'Создание витрины',
+      desc: 'Введите название вашего магазина, красивый URL-слаг и ваш Telegram юзернейм для моментального приёма заказов.',
       rotation: 'lg:rotate-[2deg]',
-      align: 'lg:ml-auto lg:w-[460px]',
-      pinPos: 'top-3 left-1/2 -translate-x-1/2',
     },
     {
       number: '02',
-      title: 'Design',
-      desc: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos.',
+      title: 'Выбор шаблона и блоков',
+      desc: 'Выберите готовый пресет (Balenciaga, Supreme, Apple) или настройте расположение визуальных блоков в конструкторе.',
       rotation: 'lg:-rotate-[3deg]',
-      align: 'lg:mr-auto lg:w-[460px]',
-      pinPos: 'top-3 left-1/2 -translate-x-1/2',
     },
     {
       number: '03',
-      title: 'Build',
-      desc: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos.',
+      title: 'Наполнение каталога',
+      desc: 'Загружайте фото товаров, указывайте доступные размеры, категории и бренды. Все изменения сохраняются мгновенно.',
       rotation: 'lg:rotate-[3deg]',
-      align: 'lg:ml-auto lg:w-[460px]',
-      pinPos: 'top-3 left-1/2 -translate-x-1/2',
     },
     {
       number: '04',
-      title: 'Launch',
-      desc: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos.',
+      title: 'Запуск продаж',
+      desc: 'Отправляйте ссылку клиентам в соцсетях и Telegram. Клиент выбирает товар, размер и сразу пишет вам готовое сообщение.',
       rotation: 'lg:-rotate-[2deg]',
-      align: 'lg:mr-auto lg:w-[460px]',
-      pinPos: 'top-3 left-1/2 -translate-x-1/2',
     },
   ]
 
@@ -41,16 +33,16 @@ export function RoadmapSection() {
       
       {/* Top Header */}
       <div className="max-w-2xl space-y-4 mb-16">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-slate-300 bg-white text-xs font-medium text-slate-700 shadow-sm">
-          <span>How we work</span>
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-slate-300 bg-white text-xs font-semibold text-slate-700 shadow-sm">
+          <span>Как это работает</span>
         </div>
         
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight font-display">
-          Let us show you how we drive your brand to new heights
+          Всего 4 простых шага до вашей первой продажи
         </h2>
 
         <p className="text-slate-500 text-sm sm:text-base leading-relaxed">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac x3
+          Простой путь от идеи до профессиональной витрины без технических трудностей.
         </p>
       </div>
 
@@ -76,45 +68,36 @@ export function RoadmapSection() {
         {/* 4 Pinned Cards */}
         <div className="space-y-12 lg:space-y-16 relative z-10">
           
-          {/* Card 01 - Define */}
           <div className="flex justify-end">
             <div className={`w-full lg:w-[480px] bg-white rounded-3xl p-8 border border-slate-200/80 shadow-card-sticker transition-transform hover:scale-[1.01] duration-300 relative ${steps[0].rotation}`}>
-              {/* Pushpin / Circle dot top */}
               <div className="w-5 h-5 rounded-full bg-slate-800 border-2 border-slate-300 shadow-inner mx-auto mb-4"></div>
-              
               <div className="text-sm font-bold text-slate-400 font-display mb-1">{steps[0].number}</div>
               <h3 className="text-2xl font-extrabold text-slate-900 mb-3 font-display">{steps[0].title}</h3>
               <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">{steps[0].desc}</p>
             </div>
           </div>
 
-          {/* Card 02 - Design */}
           <div className="flex justify-start">
             <div className={`w-full lg:w-[480px] bg-white rounded-3xl p-8 border border-slate-200/80 shadow-card-sticker transition-transform hover:scale-[1.01] duration-300 relative ${steps[1].rotation}`}>
               <div className="w-5 h-5 rounded-full bg-slate-800 border-2 border-slate-300 shadow-inner mx-auto mb-4"></div>
-              
               <div className="text-sm font-bold text-slate-400 font-display mb-1">{steps[1].number}</div>
               <h3 className="text-2xl font-extrabold text-slate-900 mb-3 font-display">{steps[1].title}</h3>
               <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">{steps[1].desc}</p>
             </div>
           </div>
 
-          {/* Card 03 - Build */}
           <div className="flex justify-end">
             <div className={`w-full lg:w-[480px] bg-white rounded-3xl p-8 border border-slate-200/80 shadow-card-sticker transition-transform hover:scale-[1.01] duration-300 relative ${steps[2].rotation}`}>
               <div className="w-5 h-5 rounded-full bg-slate-800 border-2 border-slate-300 shadow-inner mx-auto mb-4"></div>
-              
               <div className="text-sm font-bold text-slate-400 font-display mb-1">{steps[2].number}</div>
               <h3 className="text-2xl font-extrabold text-slate-900 mb-3 font-display">{steps[2].title}</h3>
               <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">{steps[2].desc}</p>
             </div>
           </div>
 
-          {/* Card 04 - Launch */}
           <div className="flex justify-start">
             <div className={`w-full lg:w-[480px] bg-white rounded-3xl p-8 border border-slate-200/80 shadow-card-sticker transition-transform hover:scale-[1.01] duration-300 relative ${steps[3].rotation}`}>
               <div className="w-5 h-5 rounded-full bg-slate-800 border-2 border-slate-300 shadow-inner mx-auto mb-4"></div>
-              
               <div className="text-sm font-bold text-slate-400 font-display mb-1">{steps[3].number}</div>
               <h3 className="text-2xl font-extrabold text-slate-900 mb-3 font-display">{steps[3].title}</h3>
               <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">{steps[3].desc}</p>
@@ -123,10 +106,10 @@ export function RoadmapSection() {
 
         </div>
 
-        {/* Handwritten "Ready to be delivered!" annotation */}
+        {/* Handwritten annotation */}
         <div className="mt-12 flex justify-center lg:justify-end items-center gap-2">
           <span className="font-handwriting text-2xl sm:text-3xl text-slate-700 font-bold -rotate-3">
-            Ready to be delivered!
+            Витрина готова к продажам!
           </span>
           <svg className="w-12 h-8 text-slate-700 stroke-2 fill-none" viewBox="0 0 60 40">
             <path d="M5 20 Q 30 5, 50 30" stroke="currentColor" strokeWidth="2" strokeDasharray="4 4" />

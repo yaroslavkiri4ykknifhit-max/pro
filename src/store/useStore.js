@@ -1,6 +1,97 @@
 import { create } from 'zustand'
 import { supabase, isConfigured } from '../lib/supabase'
 
+export const THEME_PRESETS = [
+  {
+    id: 'streetwear',
+    name: '🔥 Streetwear & Cyber (Supreme / Off-White)',
+    desc: 'Тёмный контрастный стиль с яркими акцентами для уличной одежды',
+    config: {
+      primaryColor: '#ff2a00',
+      backgroundColor: '#0d0d0d',
+      textColor: '#ffffff',
+      cardBg: '#181818',
+      font: 'Inter',
+      layout: 'grid',
+      bannerUrl: 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=1200&q=80',
+      logoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+      telegram: 'reseller_admin'
+    }
+  },
+  {
+    id: 'minimalist',
+    name: '🖤 Luxury Minimal (Balenciaga / Celine)',
+    desc: 'Строгий минимализм, монохром и элегантная типографика',
+    config: {
+      primaryColor: '#ffffff',
+      backgroundColor: '#000000',
+      textColor: '#ffffff',
+      cardBg: '#111111',
+      font: 'Inter',
+      layout: 'grid',
+      bannerUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80',
+      logoUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80',
+      telegram: 'luxe_reseller'
+    }
+  },
+  {
+    id: 'apple_clean',
+    name: '🍏 Apple Clean & Glass (Светлый премиум)',
+    desc: 'Светлый чистый интерфейс с эффектом стекла и мягкими тенями',
+    config: {
+      primaryColor: '#0066ff',
+      backgroundColor: '#f8fafc',
+      textColor: '#0f172a',
+      cardBg: '#ffffff',
+      font: 'Plus Jakarta Sans',
+      layout: 'grid',
+      bannerUrl: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=80',
+      logoUrl: '',
+      telegram: 'clean_reseller'
+    }
+  },
+  {
+    id: 'y2k_vintage',
+    name: '📼 Y2K & Vintage Retro (Stussy / Evisu)',
+    desc: 'Ретро-эстетика 2000-х, дерзкие акценты и гранжевые элементы',
+    config: {
+      primaryColor: '#e11d48',
+      backgroundColor: '#18181b',
+      textColor: '#f4f4f5',
+      cardBg: '#27272a',
+      font: 'Inter',
+      layout: 'grid',
+      bannerUrl: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1200&q=80',
+      logoUrl: '',
+      telegram: 'retro_reseller'
+    }
+  },
+  {
+    id: 'pastel_fashion',
+    name: '🌸 Pastel K-Fashion (Gentle Monster)',
+    desc: 'Нежная пастельная палитра для трендовой азиатской одежды и косметики',
+    config: {
+      primaryColor: '#db2777',
+      backgroundColor: '#faf5ff',
+      textColor: '#2e1065',
+      cardBg: '#ffffff',
+      font: 'Plus Jakarta Sans',
+      layout: 'grid',
+      bannerUrl: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=80',
+      logoUrl: '',
+      telegram: 'kfashion_store'
+    }
+  }
+]
+
+const DEFAULT_BLOCKS = [
+  { id: 'b-banner', type: 'banner', title: 'Эксклюзивная коллекция 2026', subtitle: 'Оригинальные бренды с гарантией качества', imageUrl: '' },
+  { id: 'b-categories', type: 'categories', title: 'Категории' },
+  { id: 'b-products', type: 'products', title: 'Все товары' },
+  { id: 'b-promo', type: 'promo', title: '🔥 Скидки при заказе от 2-х позиций', imageUrl: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1000&q=80', buttonText: 'Выбрать товары' },
+  { id: 'b-contact', type: 'contact', title: 'Есть вопросы по размеру или наличию?', subtitle: 'Напишите нам прямо в Telegram — ответим за 2 минуты!' }
+]
+
 const INITIAL_SHOPS = [
   {
     id: 'shop-1',
@@ -8,19 +99,8 @@ const INITIAL_SHOPS = [
     name: 'Urban Streetwear Co.',
     slug: 'urban-vibes',
     description: 'Эксклюзивные дропы уличной одежды и лимитированных кроссовок.',
-    theme_config: {
-      primaryColor: '#0066ff',
-      backgroundColor: '#090a0f',
-      textColor: '#ffffff',
-      cardBg: '#12141d',
-      accentColor: '#38bdf8',
-      font: 'Inter',
-      layout: 'grid',
-      bannerUrl: 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=1200&q=80',
-      logoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-      whatsapp: '+79990000000',
-      telegram: 'reseller_admin'
-    }
+    blocks: DEFAULT_BLOCKS,
+    theme_config: THEME_PRESETS[0].config
   },
   {
     id: 'shop-2',
@@ -28,19 +108,8 @@ const INITIAL_SHOPS = [
     name: 'Luxe Minimal Apparel',
     slug: 'luxe-store',
     description: 'Премиальный минималистичный гардероб и качественные аксессуары.',
-    theme_config: {
-      primaryColor: '#10b981',
-      backgroundColor: '#f8fafc',
-      textColor: '#0f172a',
-      cardBg: '#ffffff',
-      accentColor: '#059669',
-      font: 'Plus Jakarta Sans',
-      layout: 'grid',
-      bannerUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80',
-      logoUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80',
-      whatsapp: '+79991112233',
-      telegram: 'luxe_reseller'
-    }
+    blocks: DEFAULT_BLOCKS,
+    theme_config: THEME_PRESETS[1].config
   }
 ]
 
@@ -123,8 +192,6 @@ export const useStore = create((set, get) => ({
     return saved ? JSON.parse(saved) : INITIAL_PRODUCTS
   })(),
   activeShopId: 'shop-1',
-  isLoading: false,
-  error: null,
 
   persist: () => {
     const { shops, products } = get()
@@ -136,25 +203,17 @@ export const useStore = create((set, get) => ({
 
   fetchData: async () => {
     if (!isConfigured) return
-    set({ isLoading: true })
     try {
-      const { data: shops, error: shopsErr } = await supabase.from('shops').select('*')
-      const { data: products, error: prodsErr } = await supabase.from('products').select('*')
-
-      if (!shopsErr && shops && shops.length > 0) {
-        set({ shops })
-      }
-      if (!prodsErr && products && products.length > 0) {
-        set({ products })
-      }
+      const { data: shops } = await supabase.from('shops').select('*')
+      const { data: products } = await supabase.from('products').select('*')
+      if (shops && shops.length > 0) set({ shops })
+      if (products && products.length > 0) set({ products })
     } catch (e) {
       console.warn('Supabase fetch fallback', e)
-    } finally {
-      set({ isLoading: false })
     }
   },
 
-  // Shop actions (automatic creation with no setup needed)
+  // Shop CRUD & Preset Applier
   createShop: async (newShop) => {
     const formattedSlug = (newShop.slug || newShop.name.toLowerCase())
       .toLowerCase()
@@ -167,19 +226,9 @@ export const useStore = create((set, get) => ({
       created_at: new Date().toISOString(),
       name: newShop.name,
       slug: formattedSlug,
-      description: newShop.description || 'Кастомная витрина товаров',
-      theme_config: {
-        primaryColor: '#0066ff',
-        backgroundColor: '#090a0f',
-        textColor: '#ffffff',
-        cardBg: '#12141d',
-        font: 'Inter',
-        layout: 'grid',
-        bannerUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80',
-        logoUrl: '',
-        whatsapp: newShop.whatsapp || '',
-        telegram: newShop.telegram || 'seller_admin'
-      }
+      description: newShop.description || 'Кастомный конструктор интернет-витрины',
+      blocks: DEFAULT_BLOCKS,
+      theme_config: THEME_PRESETS[0].config
     }
 
     set((state) => ({
@@ -187,15 +236,6 @@ export const useStore = create((set, get) => ({
       activeShopId: shopWithId.id
     }))
     get().persist()
-
-    if (isConfigured) {
-      try {
-        await supabase.from('shops').insert([shopWithId])
-      } catch (e) {
-        console.error('Supabase error creating shop', e)
-      }
-    }
-
     return shopWithId
   },
 
@@ -204,31 +244,25 @@ export const useStore = create((set, get) => ({
       shops: state.shops.map((s) => (s.id === id ? { ...s, ...updates } : s))
     }))
     get().persist()
-
-    if (isConfigured) {
-      try {
-        await supabase.from('shops').update(updates).eq('id', id)
-      } catch (e) {
-        console.error('Supabase error updating shop', e)
-      }
-    }
   },
 
-  deleteShop: async (id) => {
-    set((state) => ({
-      shops: state.shops.filter((s) => s.id !== id),
-      products: state.products.filter((p) => p.shop_id !== id),
-      activeShopId: state.shops.find((s) => s.id !== id)?.id || ''
-    }))
-    get().persist()
+  applyPresetToShop: (shopId, presetId) => {
+    const preset = THEME_PRESETS.find((p) => p.id === presetId)
+    if (!preset) return
+    const shop = get().shops.find((s) => s.id === shopId)
+    if (!shop) return
 
-    if (isConfigured) {
-      try {
-        await supabase.from('shops').delete().eq('id', id)
-      } catch (e) {
-        console.error('Supabase error deleting shop', e)
+    get().updateShop(shopId, {
+      theme_config: {
+        ...shop.theme_config,
+        ...preset.config
       }
-    }
+    })
+  },
+
+  // Block Builder Actions (Add, Delete, Move, Update Block)
+  updateShopBlocks: (shopId, blocks) => {
+    get().updateShop(shopId, { blocks })
   },
 
   // Product actions
@@ -240,19 +274,8 @@ export const useStore = create((set, get) => ({
       brand: newProduct.brand || 'Без бренда',
       ...newProduct
     }
-
-    set((state) => ({
-      products: [productWithId, ...state.products]
-    }))
+    set((state) => ({ products: [productWithId, ...state.products] }))
     get().persist()
-
-    if (isConfigured) {
-      try {
-        await supabase.from('products').insert([productWithId])
-      } catch (e) {
-        console.error('Supabase error adding product', e)
-      }
-    }
   },
 
   updateProduct: async (id, updates) => {
@@ -260,14 +283,6 @@ export const useStore = create((set, get) => ({
       products: state.products.map((p) => (p.id === id ? { ...p, ...updates } : p))
     }))
     get().persist()
-
-    if (isConfigured) {
-      try {
-        await supabase.from('products').update(updates).eq('id', id)
-      } catch (e) {
-        console.error('Supabase error updating product', e)
-      }
-    }
   },
 
   deleteProduct: async (id) => {
@@ -275,14 +290,6 @@ export const useStore = create((set, get) => ({
       products: state.products.filter((p) => p.id !== id)
     }))
     get().persist()
-
-    if (isConfigured) {
-      try {
-        await supabase.from('products').delete().eq('id', id)
-      } catch (e) {
-        console.error('Supabase error deleting product', e)
-      }
-    }
   },
 
   resetDemoData: () => {

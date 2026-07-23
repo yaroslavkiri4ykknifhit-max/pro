@@ -7,12 +7,12 @@ export function TestimonialsSection() {
       
       {/* Header */}
       <div className="space-y-4 max-w-2xl mb-12">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-slate-300 bg-white text-xs font-medium text-slate-700 shadow-sm">
-          <span>Reviews</span>
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-slate-300 bg-white text-xs font-semibold text-slate-700 shadow-sm">
+          <span>Отзывы пользователей</span>
         </div>
         
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight font-display">
-          Here's what people say about <br className="hidden sm:inline" /> our work
+          Что говорят ресейлеры о платформе
         </h2>
       </div>
 
@@ -25,7 +25,7 @@ export function TestimonialsSection() {
           <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-4 border-slate-100 flex-shrink-0 shadow-md">
             <img
               src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80"
-              alt="Julia G."
+              alt="Анна Г."
               className="w-full h-full object-cover"
             />
           </div>
@@ -37,12 +37,12 @@ export function TestimonialsSection() {
             </div>
 
             <p className="text-slate-700 text-base sm:text-lg italic leading-relaxed">
-              "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur tempus urna et turpis condimentum gravida."
+              "Создала свою витрину уличной одежды буквально за 2 минуты! Клиенты постоянно хвалят удобный каталог. Главное преимущество — заказ приходит прямо в мой Telegram с указанием конкретной модели и размера, больше никаких уточнений в переписке."
             </p>
 
             <div>
-              <div className="font-bold text-slate-900 text-lg font-display">Julia G.</div>
-              <div className="text-slate-500 text-xs sm:text-sm">Brand Manager</div>
+              <div className="font-bold text-slate-900 text-lg font-display">Анна Г.</div>
+              <div className="text-slate-500 text-xs sm:text-sm">Владелица витрины Urban Trends (15k+ подписчиков)</div>
             </div>
           </div>
 

@@ -1,37 +1,37 @@
 import React from 'react'
-import { ArrowUpRight, Palette, Layers, Layout, Code, Smartphone, Terminal } from 'lucide-react'
+import { ArrowUpRight, Palette, Layers, Layout, Code, Smartphone, Send } from 'lucide-react'
 
 export function ServicesSection() {
   const services = [
     {
-      title: 'Brand Identity',
-      desc: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac all.',
-      icon: Palette
-    },
-    {
-      title: 'Illustration',
-      desc: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac all.',
-      icon: Layers
-    },
-    {
-      title: 'UI/UX Design',
-      desc: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac all.',
+      title: 'Конструктор Блоков',
+      desc: 'Добавляйте, передвигайте или удаляйте любые блоки: промо-баннеры, текстовые заметки, категории и каталоги товаров.',
       icon: Layout
     },
     {
-      title: 'Frontend Design',
-      desc: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac all.',
-      icon: Code
+      title: 'Шаблоны Модных Брендов',
+      desc: 'Готовые визуальные пресеты в стиле Balenciaga (минимализм), Supreme (streetwear), Apple (чистый светлый) и Y2K.',
+      icon: Palette
     },
     {
-      title: 'Android/iOS App',
-      desc: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac all.',
+      title: 'Прямые заказы в Telegram',
+      desc: 'Покупатель выбирает товар и размер, а система мгновенно перенаправляет в ваш Telegram с заполненным текстом заказа.',
+      icon: Send
+    },
+    {
+      title: 'Фильтры брендов и категорий',
+      desc: 'Настраивайте фильтрацию товаров по категориям и брендам для удобного поиска на вашей витрине.',
+      icon: Layers
+    },
+    {
+      title: 'Mobile-First Дизайн',
+      desc: 'Витрина оптимизирована под мобильные экраны и соцсети — идеально подходит для Link-in-bio во всех мессенджерах.',
       icon: Smartphone
     },
     {
-      title: 'Software Development',
-      desc: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac all.',
-      icon: Terminal
+      title: 'Без настроек баз данных',
+      desc: 'Забудьте о сложных панелях управления. Витрина создается мгновенно и сразу готова делиться ссылкой с клиентами.',
+      icon: Code
     },
   ]
 
@@ -42,17 +42,17 @@ export function ServicesSection() {
         {/* Header Row */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-7 space-y-4">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/20 bg-white/5 text-xs font-medium text-slate-300 backdrop-blur-md">
-              <span>What we do</span>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/20 bg-white/5 text-xs font-semibold text-slate-300 backdrop-blur-md">
+              <span>Возможности платформы</span>
             </div>
             
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight font-display text-white">
-              We design meaningful not just <br className="hidden sm:inline" /> quick impressions
+              Всё необходимое для высокого <br className="hidden sm:inline" /> уровня продаж
             </h2>
           </div>
 
           <div className="lg:col-span-5 text-slate-400 text-sm sm:text-base leading-relaxed lg:pt-8">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac all
+            Создавайте уникальный внешний вид интернет-витрины за считанные минуты и принимайте заказы напрямую в свой мессенджер.
           </div>
         </div>
 

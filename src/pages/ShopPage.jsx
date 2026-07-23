@@ -4,14 +4,12 @@ import {
   ShoppingBag,
   Send,
   MessageSquare,
-  CheckCircle,
   X,
   Share2,
   Tag,
-  Filter,
   Layers,
   Search,
-  ExternalLink
+  ArrowRight
 } from 'lucide-react'
 import { useStore } from '../store/useStore'
 
@@ -104,7 +102,6 @@ export function ShopPage() {
     const rawTg = theme.telegram || 'reseller_admin'
     const cleanTgUsername = rawTg.replace('@', '').trim()
 
-    // Formatted message strictly as requested
     const orderMessage = `Привет! Хочу заказать ${selectedProduct.title}\n` +
       `• Цена: ${selectedProduct.price.toLocaleString('ru-RU')} ₽\n` +
       `• Размер: ${selectedSize || 'Не указан'}\n` +
@@ -113,8 +110,6 @@ export function ShopPage() {
 
     const encodedText = encodeURIComponent(orderMessage)
     const tgUrl = `https://t.me/${cleanTgUsername}?text=${encodedText}`
-
-    // Redirect buyer directly to reseller's Telegram
     window.open(tgUrl, '_blank')
   }
 
@@ -131,6 +126,11 @@ export function ShopPage() {
     setTimeout(() => setCopiedLink(false), 2500)
   }
 
+  const activeBlocks = shop.blocks || [
+    { id: 'b-categories', type: 'categories' },
+    { id: 'b-products', type: 'products' }
+  ]
+
   return (
     <div
       className="min-h-screen font-sans transition-colors duration-300 flex flex-col selection:bg-blue-600 selection:text-white"
@@ -139,7 +139,7 @@ export function ShopPage() {
         color: theme.textColor || '#ffffff'
       }}
     >
-      {/* Top Banner Header */}
+      {/* Header Banner */}
       <div className="w-full relative h-48 sm:h-64 md:h-80 overflow-hidden bg-slate-900">
         {theme.bannerUrl && (
           <img
@@ -150,7 +150,7 @@ export function ShopPage() {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
 
-        {/* Top Share Button */}
+        {/* Share Button */}
         <div className="absolute top-4 right-4 max-w-5xl mx-auto z-10">
           <button
             onClick={copyShareLink}
@@ -182,161 +182,215 @@ export function ShopPage() {
         </div>
       </div>
 
-      {/* Main Catalog Container */}
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 w-full flex-grow">
-        
-        {/* FILTERS & SEARCH BAR */}
-        <div className="space-y-4 mb-8">
+      {/* Main Dynamic Blocks Container */}
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 w-full flex-grow space-y-12">
+        {activeBlocks.map((block) => {
           
-          {/* Search & Counter */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="relative flex-1 max-w-md">
-              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 opacity-50" />
-              <input
-                type="text"
-                placeholder="Поиск по названию или бренду..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white/5 border border-white/15 rounded-2xl pl-10 pr-4 py-2.5 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-white/30 backdrop-blur-md"
-              />
-            </div>
-
-            <div className="text-xs opacity-75 font-medium">
-              Показано товаров: <span className="font-bold text-white">{filteredProducts.length}</span> из {shopProducts.length}
-            </div>
-          </div>
-
-          {/* Category Filter Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-            <span className="text-xs font-bold opacity-60 flex items-center gap-1 mr-1">
-              <Layers className="w-3.5 h-3.5" />
-              Категории:
-            </span>
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                  selectedCategory === cat
-                    ? 'bg-white text-black shadow-md font-bold'
-                    : 'bg-white/5 hover:bg-white/10 text-white/80 border border-white/10'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-
-          {/* Brand Filter Pills (if brands exist) */}
-          {brands.length > 1 && (
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-              <span className="text-xs font-bold opacity-60 flex items-center gap-1 mr-1">
-                <Tag className="w-3.5 h-3.5" />
-                Бренды:
-              </span>
-              {brands.map((br) => (
-                <button
-                  key={br}
-                  onClick={() => setSelectedBrand(br)}
-                  className={`px-3.5 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
-                    selectedBrand === br
-                      ? 'bg-blue-600 text-white font-bold shadow-md'
-                      : 'bg-white/5 hover:bg-white/10 text-white/70 border border-white/10'
-                  }`}
-                >
-                  {br}
-                </button>
-              ))}
-            </div>
-          )}
-
-        </div>
-
-        {/* Products Cards Grid */}
-        {filteredProducts.length === 0 ? (
-          <div className="text-center py-20 opacity-60 bg-white/5 rounded-3xl border border-white/10">
-            <ShoppingBag className="w-12 h-12 mx-auto mb-3 opacity-40" />
-            <h3 className="text-base font-semibold">Товары не найдены</h3>
-            <p className="text-xs mt-1">Попробуйте изменить параметры поиска или сбросить фильтры.</p>
-            <button
-              onClick={() => {
-                setSelectedCategory('Все')
-                setSelectedBrand('Все бренды')
-                setSearchQuery('')
-              }}
-              className="mt-4 px-4 py-2 text-xs font-bold bg-white/10 hover:bg-white/20 text-white rounded-full"
-            >
-              Сбросить фильтры
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProducts.map((product) => (
-              <div
-                key={product.id}
-                onClick={() => setSelectedProduct(product)}
-                className="group rounded-3xl p-4 border border-white/10 shadow-xl hover:border-white/25 transition-all duration-300 cursor-pointer flex flex-col justify-between"
-                style={{ backgroundColor: theme.cardBg || '#12141d' }}
-              >
-                <div>
-                  <div className="h-60 sm:h-64 rounded-2xl overflow-hidden mb-4 relative bg-slate-900">
-                    <img
-                      src={product.image_url}
-                      alt={product.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-
-                    {/* Available Tag */}
-                    <span
-                      className={`absolute top-3 right-3 text-[10px] font-bold px-2.5 py-1 rounded-full backdrop-blur-md ${
-                        product.is_available ? 'bg-emerald-500/90 text-white' : 'bg-red-500/90 text-white'
-                      }`}
-                    >
-                      {product.is_available ? 'В наличии' : 'Распродано'}
-                    </span>
-
-                    {/* Brand Pill */}
-                    {product.brand && (
-                      <span className="absolute bottom-3 left-3 text-[10px] font-bold px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md text-white border border-white/15">
-                        {product.brand}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="text-[10px] uppercase font-bold text-blue-400 tracking-wider">
-                      {product.category || 'Одежда'}
-                    </div>
-
-                    <h3 className="font-bold text-base leading-snug line-clamp-2">
-                      {product.title}
-                    </h3>
-                    
-                    {product.size && (
-                      <div className="inline-flex items-center gap-1 text-[11px] opacity-75 bg-white/5 px-2.5 py-1 rounded-full border border-white/10">
-                        <Tag className="w-3 h-3" />
-                        <span>Размеры: {product.size}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="pt-4 mt-4 border-t border-white/10 flex items-center justify-between">
-                  <div className="text-lg font-extrabold font-display" style={{ color: theme.primaryColor || '#0066ff' }}>
-                    {product.price.toLocaleString('ru-RU')} ₽
-                  </div>
-
-                  <button
-                    style={{ backgroundColor: theme.primaryColor || '#0066ff' }}
-                    className="px-4 py-2 text-xs font-bold text-white rounded-full shadow-md hover:opacity-90 transition-opacity"
-                  >
-                    Заказать
-                  </button>
+          // BLOCK TYPE 1: BANNER
+          if (block.type === 'banner') {
+            return (
+              <div key={block.id} className="relative rounded-3xl overflow-hidden p-8 sm:p-12 border border-white/10 shadow-2xl bg-white/5">
+                {block.imageUrl && (
+                  <img src={block.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30" />
+                )}
+                <div className="relative z-10 max-w-xl space-y-3">
+                  <h2 className="text-2xl sm:text-4xl font-black font-display">{block.title}</h2>
+                  {block.subtitle && <p className="text-xs sm:text-sm opacity-80 leading-relaxed">{block.subtitle}</p>}
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+            )
+          }
+
+          // BLOCK TYPE 2: CATEGORIES & SEARCH
+          if (block.type === 'categories') {
+            return (
+              <div key={block.id} className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="relative flex-1 max-w-md">
+                    <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 opacity-50" />
+                    <input
+                      type="text"
+                      placeholder="Поиск по названию или бренду..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full bg-white/5 border border-white/15 rounded-2xl pl-10 pr-4 py-2.5 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-white/30 backdrop-blur-md"
+                    />
+                  </div>
+
+                  <div className="text-xs opacity-75 font-medium">
+                    Показано товаров: <span className="font-bold text-white">{filteredProducts.length}</span> из {shopProducts.length}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+                  <span className="text-xs font-bold opacity-60 flex items-center gap-1 mr-1">
+                    <Layers className="w-3.5 h-3.5" />
+                    Категории:
+                  </span>
+                  {categories.map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                        selectedCategory === cat
+                          ? 'bg-white text-black shadow-md font-bold'
+                          : 'bg-white/5 hover:bg-white/10 text-white/80 border border-white/10'
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+
+                {brands.length > 1 && (
+                  <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+                    <span className="text-xs font-bold opacity-60 flex items-center gap-1 mr-1">
+                      <Tag className="w-3.5 h-3.5" />
+                      Бренды:
+                    </span>
+                    {brands.map((br) => (
+                      <button
+                        key={br}
+                        onClick={() => setSelectedBrand(br)}
+                        className={`px-3.5 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                          selectedBrand === br
+                            ? 'bg-blue-600 text-white font-bold shadow-md'
+                            : 'bg-white/5 hover:bg-white/10 text-white/70 border border-white/10'
+                        }`}
+                      >
+                        {br}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          }
+
+          // BLOCK TYPE 3: PRODUCTS GRID
+          if (block.type === 'products') {
+            return (
+              <div key={block.id}>
+                {filteredProducts.length === 0 ? (
+                  <div className="text-center py-20 opacity-60 bg-white/5 rounded-3xl border border-white/10">
+                    <ShoppingBag className="w-12 h-12 mx-auto mb-3 opacity-40" />
+                    <h3 className="text-base font-semibold">Товары не найдены</h3>
+                    <button
+                      onClick={() => {
+                        setSelectedCategory('Все')
+                        setSelectedBrand('Все бренды')
+                        setSearchQuery('')
+                      }}
+                      className="mt-4 px-4 py-2 text-xs font-bold bg-white/10 hover:bg-white/20 text-white rounded-full"
+                    >
+                      Сбросить фильтры
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredProducts.map((product) => (
+                      <div
+                        key={product.id}
+                        onClick={() => setSelectedProduct(product)}
+                        className="group rounded-3xl p-4 border border-white/10 shadow-xl hover:border-white/25 transition-all duration-300 cursor-pointer flex flex-col justify-between"
+                        style={{ backgroundColor: theme.cardBg || '#12141d' }}
+                      >
+                        <div>
+                          <div className="h-60 sm:h-64 rounded-2xl overflow-hidden mb-4 relative bg-slate-900">
+                            <img
+                              src={product.image_url}
+                              alt={product.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                            <span
+                              className={`absolute top-3 right-3 text-[10px] font-bold px-2.5 py-1 rounded-full backdrop-blur-md ${
+                                product.is_available ? 'bg-emerald-500/90 text-white' : 'bg-red-500/90 text-white'
+                              }`}
+                            >
+                              {product.is_available ? 'В наличии' : 'Распродано'}
+                            </span>
+
+                            {product.brand && (
+                              <span className="absolute bottom-3 left-3 text-[10px] font-bold px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md text-white border border-white/15">
+                                {product.brand}
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="space-y-2">
+                            <div className="text-[10px] uppercase font-bold text-blue-400 tracking-wider">
+                              {product.category || 'Одежда'}
+                            </div>
+                            <h3 className="font-bold text-base leading-snug line-clamp-2">
+                              {product.title}
+                            </h3>
+                            {product.size && (
+                              <div className="inline-flex items-center gap-1 text-[11px] opacity-75 bg-white/5 px-2.5 py-1 rounded-full border border-white/10">
+                                <Tag className="w-3 h-3" />
+                                <span>Размеры: {product.size}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="pt-4 mt-4 border-t border-white/10 flex items-center justify-between">
+                          <div className="text-lg font-extrabold font-display" style={{ color: theme.primaryColor || '#0066ff' }}>
+                            {product.price.toLocaleString('ru-RU')} ₽
+                          </div>
+
+                          <button
+                            style={{ backgroundColor: theme.primaryColor || '#0066ff' }}
+                            className="px-4 py-2 text-xs font-bold text-white rounded-full shadow-md hover:opacity-90 transition-opacity"
+                          >
+                            Заказать
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          }
+
+          // BLOCK TYPE 4: PROMO IMAGE CARD
+          if (block.type === 'promo') {
+            return (
+              <div key={block.id} className="relative rounded-3xl overflow-hidden p-8 sm:p-12 border border-white/15 shadow-2xl bg-slate-900 group">
+                {block.imageUrl && (
+                  <img src={block.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-40" />
+                )}
+                <div className="relative z-10 max-w-lg space-y-4">
+                  <h3 className="text-2xl sm:text-3xl font-black font-display">{block.title}</h3>
+                  {block.subtitle && <p className="text-xs sm:text-sm text-slate-200">{block.subtitle}</p>}
+                </div>
+              </div>
+            )
+          }
+
+          // BLOCK TYPE 5: CONTACT / TELEGRAM CTA
+          if (block.type === 'contact') {
+            return (
+              <div key={block.id} className="rounded-3xl p-8 border border-white/15 bg-white/5 backdrop-blur-md text-center space-y-4">
+                <h3 className="text-xl font-bold font-display">{block.title}</h3>
+                {block.subtitle && <p className="text-xs opacity-75 max-w-md mx-auto">{block.subtitle}</p>}
+                <div>
+                  <a
+                    href={`https://t.me/${(theme.telegram || 'reseller').replace('@', '')}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#2AABEE] hover:bg-[#229ed9] text-white text-xs font-bold rounded-full shadow-lg transition-all"
+                  >
+                    <Send className="w-4 h-4" />
+                    <span>Написать в Telegram (@{(theme.telegram || 'reseller').replace('@', '')})</span>
+                  </a>
+                </div>
+              </div>
+            )
+          }
+
+          return null
+        })}
       </main>
 
       {/* Footer Branding */}
