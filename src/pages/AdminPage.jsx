@@ -6,7 +6,6 @@ import {
   Edit,
   Store,
   Package,
-  Palette,
   ExternalLink,
   Save,
   Check,
@@ -17,10 +16,9 @@ import {
   Sparkles,
   ArrowUp,
   ArrowDown,
-  Layers,
-  Image as ImageIcon,
   SlidersHorizontal,
-  Wand2
+  Wand2,
+  ShoppingBag
 } from 'lucide-react'
 import { useStore, THEME_PRESETS } from '../store/useStore'
 
@@ -40,7 +38,7 @@ export function AdminPage() {
     deleteProduct
   } = useStore()
 
-  const [activeTab, setActiveTab] = useState('blocks') // 'blocks' | 'products' | 'presets' | 'telegram' | 'shops'
+  const [activeTab, setActiveTab] = useState('presets') // 'presets' | 'blocks' | 'products' | 'telegram'
   const [showProductModal, setShowProductModal] = useState(false)
   const [showShopModal, setShowShopModal] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
@@ -84,7 +82,6 @@ export function AdminPage() {
     activeShop?.theme_config || THEME_PRESETS[0].config
   )
 
-  // Block Reordering Handlers
   const moveBlock = (index, direction) => {
     if (!activeShop) return
     const newBlocks = [...activeBlocks]
@@ -109,18 +106,18 @@ export function AdminPage() {
     if (!activeShop) return
     let newBlock = { id: 'b-' + Date.now(), type, title: 'Новый блок' }
     if (type === 'banner') {
-      newBlock = { id: 'b-' + Date.now(), type, title: 'Новая коллекция', subtitle: 'Описание подзаголовка баннера', imageUrl: '' }
+      newBlock = { id: 'b-' + Date.now(), type, title: 'Новая коллекция', subtitle: 'Описание баннера', imageUrl: '' }
     } else if (type === 'promo') {
       newBlock = {
         id: 'b-' + Date.now(),
         type,
-        title: '🔥 Спецпредложение недели',
+        title: '🔥 Спецпредложение',
         subtitle: 'Скидка на вторую позицию',
         imageUrl: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1000&q=80',
         buttonText: 'Выбрать'
       }
     } else if (type === 'contact') {
-      newBlock = { id: 'b-' + Date.now(), type, title: 'Задайте вопрос продавцу в Telegram', subtitle: 'Отвечаем за 2 минуты' }
+      newBlock = { id: 'b-' + Date.now(), type, title: 'Задайте вопрос в Telegram', subtitle: 'Отвечаем за 2 минуты' }
     }
     updateShopBlocks(activeShop.id, [...activeBlocks, newBlock])
   }
@@ -145,7 +142,6 @@ export function AdminPage() {
     setEditingBlock(null)
   }
 
-  // Product Form Handlers
   const handleOpenProductModal = (product = null) => {
     if (product) {
       setEditingProduct(product)
@@ -243,7 +239,7 @@ export function AdminPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold font-display text-white">Конструктор Витрины Ресейлера</h1>
-              <p className="text-xs text-slate-400">Настройка блоков, стилей модных брендов и заказов в Telegram</p>
+              <p className="text-xs text-slate-400">Шаблоны модных брендов с товарами + Кастомные блоки</p>
             </div>
           </div>
 
@@ -328,6 +324,18 @@ export function AdminPage() {
         {/* Tab Navigation */}
         <div className="flex border-b border-slate-800 mb-8 space-x-6 overflow-x-auto scrollbar-none">
           <button
+            onClick={() => setActiveTab('presets')}
+            className={`pb-4 px-2 text-sm font-bold flex items-center gap-2 border-b-2 whitespace-nowrap transition-colors ${
+              activeTab === 'presets'
+                ? 'border-blue-500 text-blue-400'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Wand2 className="w-4 h-4" />
+            <span>Шаблоны Брендов и Готовые Каталоги</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('blocks')}
             className={`pb-4 px-2 text-sm font-bold flex items-center gap-2 border-b-2 whitespace-nowrap transition-colors ${
               activeTab === 'blocks'
@@ -337,18 +345,6 @@ export function AdminPage() {
           >
             <SlidersHorizontal className="w-4 h-4" />
             <span>Конструктор Блоков ({activeBlocks.length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('presets')}
-            className={`pb-4 px-2 text-sm font-bold flex items-center gap-2 border-b-2 whitespace-nowrap transition-colors ${
-              activeTab === 'presets'
-                ? 'border-blue-500 text-blue-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Wand2 className="w-4 h-4" />
-            <span>Шаблоны Брендов</span>
           </button>
 
           <button
@@ -376,11 +372,87 @@ export function AdminPage() {
           </button>
         </div>
 
-        {/* TAB 1: VISUAL BLOCK BUILDER */}
+        {/* TAB 1: BRAND PRESETS WITH VISUAL PREVIEWS & AUTO PRODUCT POPULATION */}
+        {activeTab === 'presets' && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <span>Готовые витрины брендов с реальными товарами</span>
+              </h2>
+              <p className="text-xs text-slate-400">
+                Выберите бренд — система автоматически загрузит дизайн, баннеры, структуру блоков и оригинальные товары из каталога
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {THEME_PRESETS.map((preset) => (
+                <div
+                  key={preset.id}
+                  className="bg-slate-800 rounded-3xl overflow-hidden border border-slate-700/80 hover:border-blue-500 transition-all flex flex-col justify-between shadow-xl group"
+                >
+                  <div>
+                    {/* Visual Card Image Preview */}
+                    <div className="h-48 overflow-hidden relative bg-slate-950">
+                      <img
+                        src={preset.previewImage}
+                        alt={preset.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
+                      <span className="absolute top-3 right-3 text-[10px] font-bold px-3 py-1 rounded-full bg-black/80 backdrop-blur-md text-white border border-white/20">
+                        {preset.sampleProducts.length} товаров в наборе
+                      </span>
+                    </div>
+
+                    {/* Description */}
+                    <div className="p-6 space-y-4">
+                      <div>
+                        <h3 className="text-lg font-bold text-white font-display mb-1">{preset.name}</h3>
+                        <p className="text-xs text-slate-400 leading-relaxed">{preset.desc}</p>
+                      </div>
+
+                      {/* Sample Products Included in this Preset */}
+                      <div className="space-y-2 pt-2 border-t border-slate-700/60">
+                        <span className="text-[11px] font-bold text-blue-400 flex items-center gap-1">
+                          <ShoppingBag className="w-3.5 h-3.5" />
+                          <span>Товары, которые будут добавлены:</span>
+                        </span>
+                        <div className="space-y-1">
+                          {preset.sampleProducts.map((sp, i) => (
+                            <div key={i} className="text-xs text-slate-300 flex items-center justify-between">
+                              <span className="truncate max-w-[200px]">• {sp.title}</span>
+                              <span className="font-bold text-slate-400">{sp.price.toLocaleString('ru-RU')} ₽</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Apply Preset Action Button */}
+                  <div className="p-6 pt-0">
+                    <button
+                      onClick={() => {
+                        if (window.confirm(`Загрузить шаблон "${preset.name}" и обновить товары в магазине "${activeShop?.name}"?`)) {
+                          applyPresetToShop(activeShop.id, preset.id)
+                          alert(`Шаблон "${preset.name}" с оригинальными товарами успешно применен!`)
+                        }
+                      }}
+                      className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2"
+                    >
+                      <Wand2 className="w-4 h-4" />
+                      <span>Применить шаблон и загрузить товары</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: VISUAL BLOCK BUILDER */}
         {activeTab === 'blocks' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
-            {/* Left Block Control List */}
             <div className="lg:col-span-7 space-y-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -388,7 +460,6 @@ export function AdminPage() {
                   <p className="text-xs text-slate-400">Меняйте порядок блоков, редактируйте тексты и вставляйте картинки</p>
                 </div>
 
-                {/* Add Block Dropdown Buttons */}
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleAddBlock('banner')}
@@ -405,7 +476,6 @@ export function AdminPage() {
                 </div>
               </div>
 
-              {/* Active Blocks Draggable/Reorderable List */}
               <div className="space-y-4">
                 {activeBlocks.map((block, idx) => (
                   <div
@@ -432,7 +502,6 @@ export function AdminPage() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      {/* Reorder Buttons */}
                       <button
                         onClick={() => moveBlock(idx, -1)}
                         disabled={idx === 0}
@@ -451,22 +520,20 @@ export function AdminPage() {
                         <ArrowDown className="w-4 h-4" />
                       </button>
 
-                      {/* Edit Button */}
                       {(block.type === 'banner' || block.type === 'promo' || block.type === 'contact') && (
                         <button
                           onClick={() => handleOpenEditBlock(block)}
                           className="p-1.5 text-blue-400 hover:text-blue-300 rounded-lg hover:bg-slate-700"
-                          title="Редактировать содержимое"
+                          title="Редактировать"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                       )}
 
-                      {/* Delete Button */}
                       <button
                         onClick={() => deleteBlock(block.id)}
                         className="p-1.5 text-red-400 hover:text-red-300 rounded-lg hover:bg-slate-700"
-                        title="Удалить блок"
+                        title="Удалить"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -512,56 +579,13 @@ export function AdminPage() {
           </div>
         )}
 
-        {/* TAB 2: BRAND PRESETS SELECTOR */}
-        {activeTab === 'presets' && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-xl font-bold text-white">Готовые стили и шаблоны модных брендов</h2>
-              <p className="text-xs text-slate-400">Выберите готовый пресет оформления в 1 клик для вашего магазина</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {THEME_PRESETS.map((preset) => (
-                <div
-                  key={preset.id}
-                  className="bg-slate-800 rounded-3xl p-6 border border-slate-700 hover:border-blue-500 transition-all flex flex-col justify-between space-y-4 shadow-lg group"
-                >
-                  <div>
-                    <h3 className="text-lg font-bold text-white font-display mb-1">{preset.name}</h3>
-                    <p className="text-xs text-slate-400 leading-relaxed mb-4">{preset.desc}</p>
-
-                    {/* Color Swatches */}
-                    <div className="flex items-center gap-2 pt-2">
-                      <span className="text-xs text-slate-500">Палитра:</span>
-                      <span className="w-5 h-5 rounded-full border border-white/20" style={{ backgroundColor: preset.config.backgroundColor }}></span>
-                      <span className="w-5 h-5 rounded-full border border-white/20" style={{ backgroundColor: preset.config.cardBg }}></span>
-                      <span className="w-5 h-5 rounded-full border border-white/20" style={{ backgroundColor: preset.config.primaryColor }}></span>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      applyPresetToShop(activeShop.id, preset.id)
-                      alert(`Стиль "${preset.name}" применен к вашей витрине!`)
-                    }}
-                    className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-2xl shadow-md transition-all flex items-center justify-center gap-2"
-                  >
-                    <Wand2 className="w-4 h-4" />
-                    <span>Применить этот шаблон</span>
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* TAB 3: PRODUCTS MANAGEMENT */}
         {activeTab === 'products' && (
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h2 className="text-xl font-bold text-white">Каталог товаров "{activeShop?.name}"</h2>
-                <p className="text-xs text-slate-400">Добавляйте товары с ценой, размерами, брендами и категориями</p>
+                <p className="text-xs text-slate-400">Добавляйте свои товары или выберите готовую коллекцию во вкладке "Шаблоны Брендов"</p>
               </div>
 
               <button
@@ -575,15 +599,23 @@ export function AdminPage() {
 
             {/* Products Grid */}
             {shopProducts.length === 0 ? (
-              <div className="text-center py-16 bg-slate-800/40 rounded-3xl border border-dashed border-slate-700">
-                <Package className="w-12 h-12 text-slate-500 mx-auto mb-3" />
+              <div className="text-center py-16 bg-slate-800/40 rounded-3xl border border-dashed border-slate-700 space-y-3">
+                <Package className="w-12 h-12 text-slate-500 mx-auto" />
                 <h3 className="text-base font-semibold text-slate-300">В этом магазине пока нет товаров</h3>
-                <button
-                  onClick={() => handleOpenProductModal()}
-                  className="mt-3 px-5 py-2.5 text-xs font-bold bg-blue-600 text-white rounded-xl shadow-md"
-                >
-                  Добавить товар
-                </button>
+                <div className="flex justify-center gap-3 pt-2">
+                  <button
+                    onClick={() => setActiveTab('presets')}
+                    className="px-4 py-2 text-xs font-bold bg-blue-600 text-white rounded-xl shadow-md"
+                  >
+                    Загрузить готовый каталог бренда
+                  </button>
+                  <button
+                    onClick={() => handleOpenProductModal()}
+                    className="px-4 py-2 text-xs font-semibold bg-slate-700 text-white rounded-xl"
+                  >
+                    Добавить вручную
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -789,7 +821,7 @@ export function AdminPage() {
                   value={prodForm.title}
                   onChange={(e) => setProdForm({ ...prodForm, title: e.target.value })}
                   className="bg-slate-900 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
-                  placeholder="Например: Oversized Acid-Wash Hoodie"
+                  placeholder="Например: Supreme Box Logo Hoodie"
                 />
               </div>
 
