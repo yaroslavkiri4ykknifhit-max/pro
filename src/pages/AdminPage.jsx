@@ -20,7 +20,7 @@ import {
   FileText
 } from 'lucide-react'
 import { useStore } from '../store/useStore'
-import { THEME_LIBRARY } from '../themes/index.js'
+import { THEME_LIBRARY } from '../themes/index.jsx'
 import { LeftRailNav } from '../components/builder/LeftRailNav'
 import { StructureSidebar } from '../components/builder/StructureSidebar'
 import { LiveCanvasPreview } from '../components/builder/LiveCanvasPreview'
@@ -45,7 +45,7 @@ export function AdminPage() {
     deleteProduct
   } = useStore()
 
-  // Primary Workspace Navigation Mode: 'editor' | 'pages' | 'themes' | 'products' | 'design' | 'publish'
+  // Navigation Mode
   const [activeMode, setActiveMode] = useState('editor')
 
   // Modals & Drawers
@@ -80,7 +80,6 @@ export function AdminPage() {
   // New Shop Form State
   const [shopForm, setShopForm] = useState({ name: '', slug: '', description: '', telegram: '' })
 
-  // Reorder & Layer Handlers
   const handleMoveBlock = (index, direction) => {
     if (!activeShop) return
     const newBlocks = [...activeBlocks]
@@ -150,7 +149,6 @@ export function AdminPage() {
     updateShopBlocks(activeShop.id, updated)
   }
 
-  // Product CRUD
   const handleOpenProductModal = (product = null) => {
     if (product) {
       setEditingProduct(product)
@@ -231,7 +229,6 @@ export function AdminPage() {
   return (
     <div className="h-screen w-screen bg-[#090a0f] text-slate-100 font-sans flex overflow-hidden selection:bg-blue-600 selection:text-white">
       
-      {/* 1. LEFT RAIL ICON NAVIGATION */}
       <LeftRailNav
         activeMode={activeMode}
         setActiveMode={(mode) => {
@@ -244,10 +241,8 @@ export function AdminPage() {
         shop={activeShop}
       />
 
-      {/* MAIN STUDIO WORKSPACE */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         
-        {/* TOP COMPACT STUDIO BAR */}
         <header className="h-14 bg-[#0d0f17] border-b border-slate-800/80 px-6 flex items-center justify-between z-40 flex-shrink-0 select-none">
           <div className="flex items-center gap-3">
             <select
@@ -277,7 +272,7 @@ export function AdminPage() {
               className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold rounded-xl border border-slate-800 transition-all shadow-sm"
             >
               <Wand2 className="w-3.5 h-3.5 text-blue-400" />
-              <span>Сменить шаблон</span>
+              <span>Сменить шаблон (Balenciaga / Poizon / Zara)</span>
             </button>
 
             <button
@@ -290,13 +285,10 @@ export function AdminPage() {
           </div>
         </header>
 
-        {/* WORKSPACE BODY DEPENDING ON ACTIVE MODE */}
         <div className="flex-1 flex overflow-hidden relative">
           
-          {/* MODE: EDITOR (3-COLUMN STUDIO LAYOUT) */}
           {activeMode === 'editor' && (
             <>
-              {/* COLUMN 1: LEFT STRUCTURE SIDEBAR */}
               <StructureSidebar
                 blocks={activeBlocks}
                 selectedBlockId={selectedBlockId}
@@ -308,7 +300,6 @@ export function AdminPage() {
                 onOpenLibrary={() => setShowSectionLibrary(true)}
               />
 
-              {/* COLUMN 2: CENTER LIVE CANVAS PREVIEW */}
               <LiveCanvasPreview
                 shop={activeShop}
                 products={products}
@@ -323,7 +314,6 @@ export function AdminPage() {
                 onInlineTextChange={handleInlineTextChange}
               />
 
-              {/* COLUMN 3: RIGHT CONTEXT INSPECTOR */}
               <ContextInspector
                 shop={activeShop}
                 selectedBlock={selectedBlock}
@@ -332,14 +322,12 @@ export function AdminPage() {
             </>
           )}
 
-          {/* MODE: DESIGN */}
           {activeMode === 'design' && (
             <div className="flex-1 overflow-y-auto p-8 bg-[#090a0f] flex justify-center">
               <DesignPanel shop={activeShop} />
             </div>
           )}
 
-          {/* MODE: PRODUCTS */}
           {activeMode === 'products' && (
             <div className="flex-1 overflow-y-auto p-8 bg-[#090a0f] space-y-6">
               <div className="flex items-center justify-between">
@@ -369,7 +357,6 @@ export function AdminPage() {
             </div>
           )}
 
-          {/* MODE: PAGES / PUBLISH */}
           {(activeMode === 'pages' || activeMode === 'publish') && (
             <div className="flex-1 overflow-y-auto p-8 bg-[#090a0f] space-y-6 max-w-xl">
               <h2 className="text-xl font-black text-white font-display">Настройки Публикации и Telegram</h2>
@@ -383,20 +370,6 @@ export function AdminPage() {
                     className="bg-slate-950 border border-slate-800 text-xs font-bold text-white rounded-xl px-4 py-3 w-full"
                   />
                 </div>
-
-                <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Валюта магазина:</label>
-                  <select
-                    value={activeShop?.theme_config?.currencySymbol || '₽'}
-                    onChange={(e) => updateShop(activeShop.id, { theme_config: { ...(activeShop.theme_config || {}), currencySymbol: e.target.value } })}
-                    className="bg-slate-950 border border-slate-800 text-xs font-bold text-white rounded-xl px-4 py-3 w-full"
-                  >
-                    <option value="₽">Рубль (₽)</option>
-                    <option value="₾">Лари (₾)</option>
-                    <option value="$">Доллар ($)</option>
-                    <option value="€">Евро (€)</option>
-                  </select>
-                </div>
               </div>
             </div>
           )}
@@ -405,7 +378,6 @@ export function AdminPage() {
 
       </div>
 
-      {/* FULLSCREEN TEMPLATE GALLERY MODAL */}
       <TemplateGalleryModal
         isOpen={showTemplateGallery}
         onClose={() => {
@@ -419,14 +391,12 @@ export function AdminPage() {
         }}
       />
 
-      {/* TILDA SECTION LIBRARY MODAL */}
       <SectionLibraryModal
         isOpen={showSectionLibrary}
         onClose={() => setShowSectionLibrary(false)}
         onSelectSection={handleAddSectionFromLibrary}
       />
 
-      {/* CREATE SHOP MODAL */}
       {showShopModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 space-y-6 shadow-2xl relative">
@@ -475,7 +445,6 @@ export function AdminPage() {
         </div>
       )}
 
-      {/* PRODUCT MODAL */}
       {showProductModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 space-y-6 shadow-2xl relative">

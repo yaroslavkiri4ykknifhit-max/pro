@@ -1,8 +1,7 @@
 import { create } from 'zustand'
 import { supabase, isConfigured } from '../lib/supabase'
-import { THEME_LIBRARY } from '../themes/index.js'
+import { THEME_LIBRARY, THEMES_REGISTRY } from '../themes/index.jsx'
 
-// TILDA-LIKE BLOCK CATEGORIES LIBRARY WITH RICH VARIANTS (15 Hero, 12 Catalog, 15 Banner, 10 Footer, 12 Reviews, 8 Gallery, 15 CTA, 8 FAQ)
 export const TILDA_BLOCK_LIBRARY = [
   {
     category: 'Hero',
@@ -11,14 +10,13 @@ export const TILDA_BLOCK_LIBRARY = [
     items: Array.from({ length: 15 }, (_, i) => ({
       variant: i + 1,
       name: `Hero Вариант #${i + 1}`,
-      desc: i === 0 ? 'Минималистичный центр' : i === 1 ? 'Сплит с картинкой справа' : i === 2 ? 'Editorial во весь экран' : `Дизайнерская обложка #${i + 1}`,
+      desc: i === 0 ? 'Balenciaga High Fashion Hero' : i === 1 ? 'Poizon Cyber Sneaker Hero' : i === 2 ? 'Zara Editorial Tall Hero' : `Дизайнерская обложка #${i + 1}`,
       type: 'hero',
       defaultProps: {
         title: 'НОВАЯ КОЛЛЕКЦИЯ 2026',
         subtitle: 'Эксклюзивная подборка брендов в наличии',
         imageUrl: 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=1200&q=80',
         height: 'medium',
-        textAlignment: i % 2 === 0 ? 'center' : 'left',
         buttonText: 'Смотреть каталог'
       }
     }))
@@ -27,53 +25,18 @@ export const TILDA_BLOCK_LIBRARY = [
   {
     category: 'Catalog',
     name: '📦 Каталог и Карточки',
-    count: 12,
-    items: Array.from({ length: 12 }, (_, i) => ({
+    count: 20,
+    items: Array.from({ length: 20 }, (_, i) => ({
       variant: i + 1,
       name: `Catalog Сетка #${i + 1}`,
-      desc: i === 0 ? 'Underbuy (2 колонки + сердечки)' : i === 1 ? 'Poizon Cyber Drop' : i === 2 ? 'Zara Tall Editorial' : `Карточки каталога #${i + 1}`,
+      desc: i === 0 ? 'Balenciaga (2 колонки + сердечки)' : i === 1 ? 'Poizon Cyber (4 колонки + скидки)' : i === 2 ? 'Zara Editorial Portrait' : `Карточки каталога #${i + 1}`,
       type: 'products',
       defaultProps: {
         title: 'Каталог товаров',
-        columns: i === 0 || i === 2 ? 2 : i === 1 ? 2 : 3,
+        columns: i === 1 ? 4 : 2,
         cardStyle: i === 0 ? 'underbuy' : i === 1 ? 'poizon' : i === 2 ? 'zara' : 'modern',
         showHeartIcon: true,
         showBrandBadge: true
-      }
-    }))
-  },
-
-  {
-    category: 'Banner',
-    name: '📸 Промо Баннеры',
-    count: 15,
-    items: Array.from({ length: 15 }, (_, i) => ({
-      variant: i + 1,
-      name: `Banner Вариант #${i + 1}`,
-      desc: `Акционный баннер #${i + 1}`,
-      type: 'promo',
-      defaultProps: {
-        title: '🔥 Спецпредложение недели',
-        subtitle: 'Скидка до 15% при заказе от двух вещей',
-        imageUrl: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1000&q=80',
-        buttonText: 'Выбрать'
-      }
-    }))
-  },
-
-  {
-    category: 'Reviews',
-    name: '⭐ Отзывы и Репутация',
-    count: 12,
-    items: Array.from({ length: 12 }, (_, i) => ({
-      variant: i + 1,
-      name: `Reviews Вариант #${i + 1}`,
-      desc: `Отзывы покупателей #${i + 1}`,
-      type: 'reviews',
-      defaultProps: {
-        title: 'Отзывы наших покупателей',
-        text: 'Заказывал Balenciaga Triple S, всё пришло за 4 дня! Состояние идеально, оригинальность подтверждена.',
-        author: 'Александр К., Москва'
       }
     }))
   },
@@ -85,7 +48,7 @@ export const TILDA_BLOCK_LIBRARY = [
     items: Array.from({ length: 15 }, (_, i) => ({
       variant: i + 1,
       name: `CTA Вариант #${i + 1}`,
-      desc: `Блок прямого заказа #${i + 1}`,
+      desc: `Блок прямого заказа в Telegram #${i + 1}`,
       type: 'contact',
       defaultProps: {
         title: 'Есть вопросы по размеру или наличию?',
@@ -93,65 +56,58 @@ export const TILDA_BLOCK_LIBRARY = [
         buttonText: 'Написать в Telegram'
       }
     }))
-  },
-
-  {
-    category: 'Footer',
-    name: '🔻 Подвал (Footer)',
-    count: 10,
-    items: Array.from({ length: 10 }, (_, i) => ({
-      variant: i + 1,
-      name: `Footer Вариант #${i + 1}`,
-      desc: `Подвал сайта #${i + 1}`,
-      type: 'footer',
-      defaultProps: {
-        copyright: '© 2026. Все права защищены.'
-      }
-    }))
   }
 ]
 
 const INITIAL_SHOPS = [
   {
-    id: 'shop-underbuy',
-    name: 'Underbuy Resell Store',
-    slug: 'under-buy',
-    description: 'Элитный ресейл брендовой одежды и аксессуаров.',
-    blocks: THEME_LIBRARY[0].blocksJson,
-    theme_config: THEME_LIBRARY[0].themeJson
+    id: 'shop-balenciaga',
+    name: 'Balenciaga Resell Store',
+    slug: 'balenciaga-type',
+    description: 'Элитный ресейл брендовой одежды высокой моды.',
+    blocks: THEMES_REGISTRY.balenciaga.defaultBlocks,
+    theme_config: THEMES_REGISTRY.balenciaga.tokens
   },
   {
     id: 'shop-poizon',
     name: 'Poizon Cyber Store',
-    slug: 'poizon-drop',
-    description: 'Лимитированные релизы кроссовок с гарантией подлинности.',
-    blocks: THEME_LIBRARY[1].blocksJson,
-    theme_config: THEME_LIBRARY[1].themeJson
+    slug: 'poizon-street',
+    description: 'Лимитированные релизы кроссовок с гарантией подлинности POIZON.',
+    blocks: THEMES_REGISTRY.poizon.defaultBlocks,
+    theme_config: THEMES_REGISTRY.poizon.tokens
+  },
+  {
+    id: 'shop-zara',
+    name: 'Zara Editorial Store',
+    slug: 'zara-editorial',
+    description: 'Редакционная эстетика фэшн-журнала и чистые силуэты.',
+    blocks: THEMES_REGISTRY.zara.defaultBlocks,
+    theme_config: THEMES_REGISTRY.zara.tokens
   }
 ]
 
 const INITIAL_PRODUCTS = [
-  { id: 'prod-ub-1', shop_id: 'shop-underbuy', title: 'ENFANTS RICHES DEPRIMES RECORDS TOTE BAG', price: 6500, oldPrice: 8900, size: 'One Size', category: 'СУМКИ', brand: 'ENFANTS RICHES DEPRIMES', image_url: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80', is_available: true },
-  { id: 'prod-ub-2', shop_id: 'shop-underbuy', title: 'Y-3 LOGO SHOULDER BAG', price: 12500, oldPrice: 15000, size: 'One Size', category: 'СУМКИ', brand: 'Y-3', image_url: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80', is_available: true },
-  { id: 'prod-ub-3', shop_id: 'shop-underbuy', title: 'BALENCIAGA TRIPLE S BLACK EDITION', price: 65000, oldPrice: 78000, size: '42, 43', category: 'ОБУВЬ', brand: 'BALENCIAGA', image_url: 'https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&w=800&q=80', is_available: true },
-  { id: 'prod-p1', shop_id: 'shop-poizon', title: 'Nike Air Jordan 1 High OG', price: 24500, oldPrice: 28000, size: '41, 42, 43', category: 'ОБУВЬ', brand: 'NIKE', image_url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80', is_available: true }
+  { id: 'prod-b-1', shop_id: 'shop-balenciaga', title: 'BALENCIAGA TRIPLE S BLACK EDITION', price: 65000, oldPrice: 78000, size: '42, 43', category: 'ОБУВЬ', brand: 'BALENCIAGA', image_url: 'https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&w=800&q=80', is_available: true },
+  { id: 'prod-b-2', shop_id: 'shop-balenciaga', title: 'ENFANTS RICHES DEPRIMES RECORDS TOTE BAG', price: 6500, oldPrice: 8900, size: 'One Size', category: 'СУМКИ', brand: 'ENFANTS RICHES DEPRIMES', image_url: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80', is_available: true },
+  { id: 'prod-p-1', shop_id: 'shop-poizon', title: 'Nike Air Jordan 1 High OG', price: 24500, oldPrice: 28000, size: '41, 42, 43', category: 'ОБУВЬ', brand: 'NIKE', image_url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80', is_available: true },
+  { id: 'prod-z-1', shop_id: 'shop-zara', title: 'Oversized Double Breasted Coat', price: 18900, oldPrice: 22000, size: 'M, L', category: 'ОДЕЖДА', brand: 'ZARA', image_url: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80', is_available: true }
 ]
 
 export const useStore = create((set, get) => ({
   shops: (() => {
-    const saved = localStorage.getItem('creatiwise_shops_v2')
+    const saved = localStorage.getItem('creatiwise_shops_v3')
     return saved ? JSON.parse(saved) : INITIAL_SHOPS
   })(),
   products: (() => {
-    const saved = localStorage.getItem('creatiwise_products_v2')
+    const saved = localStorage.getItem('creatiwise_products_v3')
     return saved ? JSON.parse(saved) : INITIAL_PRODUCTS
   })(),
-  activeShopId: 'shop-underbuy',
+  activeShopId: 'shop-balenciaga',
 
   persist: () => {
     const { shops, products } = get()
-    localStorage.setItem('creatiwise_shops_v2', JSON.stringify(shops))
-    localStorage.setItem('creatiwise_products_v2', JSON.stringify(products))
+    localStorage.setItem('creatiwise_shops_v3', JSON.stringify(shops))
+    localStorage.setItem('creatiwise_products_v3', JSON.stringify(products))
   },
 
   setActiveShopId: (id) => set({ activeShopId: id }),
@@ -175,6 +131,7 @@ export const useStore = create((set, get) => ({
       .replace(/-+/g, '-')
 
     const defaultPreset = THEME_LIBRARY[0]
+    const themePkg = THEMES_REGISTRY[defaultPreset.id]
     const shopId = 'shop-' + Date.now()
 
     const shopWithId = {
@@ -184,9 +141,9 @@ export const useStore = create((set, get) => ({
       name: newShop.name,
       slug: formattedSlug,
       description: newShop.description || 'Кастомная витрина',
-      blocks: defaultPreset.blocksJson,
+      blocks: themePkg.defaultBlocks,
       theme_config: {
-        ...defaultPreset.themeJson,
+        ...themePkg.tokens,
         logoText: newShop.name,
         telegram: newShop.telegram || 'reseller_admin'
       }
@@ -207,18 +164,18 @@ export const useStore = create((set, get) => ({
     get().persist()
   },
 
-  // APPLY FULL THEME PRESET (loads theme.json, layout.json, blocks.json)
+  // APPLY FULL THEME PRESET (rebuilds entire blocks structure & tokens to theme's dedicated component set)
   applyPresetToShop: (shopId, presetId) => {
-    const preset = THEME_LIBRARY.find((p) => p.id === presetId)
-    if (!preset) return
+    const themePkg = THEMES_REGISTRY[presetId]
+    if (!themePkg) return
 
     set((state) => ({
       shops: state.shops.map((s) =>
         s.id === shopId
           ? {
               ...s,
-              blocks: JSON.parse(JSON.stringify(preset.blocksJson)),
-              theme_config: JSON.parse(JSON.stringify(preset.themeJson))
+              blocks: JSON.parse(JSON.stringify(themePkg.defaultBlocks)),
+              theme_config: JSON.parse(JSON.stringify(themePkg.tokens))
             }
           : s
       )
@@ -226,7 +183,6 @@ export const useStore = create((set, get) => ({
     get().persist()
   },
 
-  // DESIGN PANEL TOKEN UPDATER (Colors, Fonts, Radii, Shadows, Container Width)
   updateDesignTokens: (shopId, tokenUpdates) => {
     set((state) => ({
       shops: state.shops.map((s) => {
