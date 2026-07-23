@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import {
   Monitor,
   Tablet,
@@ -41,10 +41,10 @@ export function LiveCanvasPreview({
 
   const deviceWidthClass =
     deviceView === 'mobile'
-      ? 'w-[385px] py-8'
+      ? 'w-[375px] max-w-full my-6'
       : deviceView === 'tablet'
-      ? 'w-[780px] py-8'
-      : 'w-full max-w-[1350px] py-4'
+      ? 'w-[768px] max-w-full my-6'
+      : 'w-full max-w-[1350px] my-4'
 
   return (
     <div className="flex-1 bg-[#090a0f] flex flex-col h-full overflow-hidden relative">
@@ -79,20 +79,20 @@ export function LiveCanvasPreview({
             }`}
           >
             <Smartphone className="w-4 h-4" />
-            <span className="hidden sm:inline">Мобильный</span>
+            <span className="hidden sm:inline">Мобильный (375px)</span>
           </button>
         </div>
 
         <div className="text-xs font-mono font-bold text-slate-400 flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>LIVE BROWSER PREVIEW • {tokens.name.toUpperCase()}</span>
+          <span>NATIVE MOBILE & DESKTOP STOREFRONT • {tokens.name.toUpperCase()}</span>
         </div>
       </div>
 
-      {/* FULL UNRESTRICTED NATURAL BROWSER SCROLL AREA */}
+      {/* FULL UNRESTRICTED SCROLL VIEWPORT */}
       <div
         tabIndex={0}
-        className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-8 flex justify-center bg-[#090a0f] focus:outline-none scroll-smooth"
+        className="flex-1 overflow-y-auto overflow-x-hidden p-2 sm:p-6 flex justify-center bg-[#090a0f] focus:outline-none scroll-smooth"
       >
         <div
           className={`${deviceWidthClass} transition-all duration-300 min-h-full h-auto shadow-2xl flex flex-col relative border border-slate-800 rounded-3xl`}
@@ -103,8 +103,8 @@ export function LiveCanvasPreview({
           }}
         >
 
-          {/* RENDER THEME BLOCKS WITH NATURAL DOCUMENT HEIGHT */}
-          <main className="flex-1 p-6 space-y-12 h-auto">
+          {/* RENDER THEME BLOCKS WITH RESPONSIVE NATIVE COMPONENT ARCHITECTURE */}
+          <main className="flex-1 p-2 sm:p-6 space-y-6 h-auto">
             {blocks.filter((b) => !b.hidden).map((block, idx) => {
               const isSelected = selectedBlockId === block.id
 
@@ -155,7 +155,7 @@ export function LiveCanvasPreview({
                   )}
 
                   {block.type === 'products' && (
-                    <CatalogComponent products={shopProducts} currencySymbol={currencySymbol} />
+                    <CatalogComponent products={shopProducts} currencySymbol={currencySymbol} telegram={telegram} />
                   )}
 
                   {block.type === 'contact' && (
@@ -167,10 +167,10 @@ export function LiveCanvasPreview({
           </main>
 
           {/* Bottom Canvas "+ Добавить секцию" Button */}
-          <div className="p-12 text-center bg-slate-900/10 border-t border-slate-200">
+          <div className="p-8 text-center bg-slate-900/10 border-t border-slate-200">
             <button
               onClick={onOpenLibrary}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-black text-white font-black text-xs uppercase tracking-wider rounded-full shadow-xl hover:scale-105 transition-transform"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-black text-white font-black text-xs uppercase tracking-wider rounded-full shadow-xl hover:scale-105 transition-transform"
             >
               <Plus className="w-4 h-4" />
               <span>+ Добавить секцию</span>

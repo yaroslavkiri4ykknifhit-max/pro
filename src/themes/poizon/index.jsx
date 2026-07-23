@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from 'react'
-import { ShieldCheck, Search, ShoppingBag, Send, Tag, Flame, Heart, ChevronDown, X, Sparkles, SlidersHorizontal } from 'lucide-react'
+import { ShieldCheck, Search, ShoppingBag, Send, Tag, Flame, Heart, ChevronDown, X, Filter } from 'lucide-react'
 
 export const poizonTokens = {
   id: 'poizon',
   name: 'STREET MARKETPLACE SHOPIFY THEME',
-  subtitle: 'Poizon & StockX Cyber Marketplace',
-  desc: 'Плотный маркетплейс кроссовок: мгновенный поиск на первом экране, 4 колонки товаров, скидки, размеры и 100% Legit Check',
+  subtitle: 'Poizon & StockX Mobile UX',
+  desc: 'Нативная мобильная e-commerce архитектура: 2 колонки на смартфоне, модальный Filter Bottom Sheet, неоновые чипсы и моментальный поиск',
   colors: {
     primary: '#00f0ff',
     background: '#080a10',
@@ -27,14 +27,13 @@ export const poizonTokens = {
 }
 
 export function PoizonHero({ props }) {
-  // Minimal compact tech status bar
   return (
-    <div className="bg-[#111624] border border-[#1b2336] rounded-2xl py-2.5 px-6 text-center text-xs font-bold text-[#00f0ff] uppercase flex items-center justify-between">
-      <div className="flex items-center gap-2">
-        <ShieldCheck className="w-4 h-4 text-[#00f0ff]" />
-        <span>POIZON 100% VERIFIED LEGIT CHECK MARKETPLACE</span>
+    <div className="bg-[#111624] border border-[#1b2336] rounded-2xl py-2 px-4 text-center text-[10px] sm:text-xs font-bold text-[#00f0ff] uppercase flex items-center justify-between">
+      <div className="flex items-center gap-1.5">
+        <ShieldCheck className="w-3.5 h-3.5 text-[#00f0ff]" />
+        <span>POIZON 100% VERIFIED LEGIT CHECK</span>
       </div>
-      <span className="hidden sm:inline text-slate-400 font-mono text-[11px]">EXPRESS AIR SHIPPING 3-5 DAYS</span>
+      <span className="hidden sm:inline text-slate-400 font-mono text-[10px]">AIR SHIP 3-5 DAYS</span>
     </div>
   )
 }
@@ -46,6 +45,7 @@ export function PoizonCatalog({ products, currencySymbol, telegram }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [favorites, setFavorites] = useState({})
   const [quickViewProduct, setQuickViewProduct] = useState(null)
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false)
 
   const categories = ['ВСЕ', 'КРОССОВКИ', 'ХУДИ', 'ФУТБОЛКИ', 'КУРТКИ', 'ШТАНЫ', 'СУМКИ']
   const brands = ['ВСЕ БРЕНДЫ', 'NIKE', 'JORDAN', 'ADIDAS', 'SUPREME', 'OFF-WHITE', 'STONE ISLAND']
@@ -79,33 +79,43 @@ export function PoizonCatalog({ products, currencySymbol, telegram }) {
   }
 
   return (
-    <div className="space-y-6 py-4 text-white">
+    <div className="space-y-4 sm:space-y-6 py-2 sm:py-4 text-white">
       
       {/* 1. FRONT-PAGE MARKETPLACE SEARCH & FILTER CONTROLS */}
-      <div className="space-y-4 bg-[#111624] p-5 rounded-3xl border border-[#1b2336] shadow-2xl">
+      <div className="space-y-3 bg-[#111624] p-3 sm:p-5 rounded-2xl sm:rounded-3xl border border-[#1b2336] shadow-2xl">
         
-        {/* Instant Search Bar */}
-        <div className="relative">
-          <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Поиск по 300+ позициям кроссовок и одежды..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#080a10] border border-[#1b2336] rounded-2xl pl-12 pr-4 py-3.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-[#00f0ff] font-bold"
-          />
+        {/* Instant Search Bar + Filter Trigger */}
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Поиск по кроссовкам и одежде..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-[#080a10] border border-[#1b2336] rounded-xl pl-10 pr-3 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-[#00f0ff] font-bold"
+            />
+          </div>
+
+          <button
+            onClick={() => setIsFilterDrawerOpen(true)}
+            className="flex items-center gap-1 px-3 py-2.5 bg-[#00f0ff] text-black text-xs font-bold rounded-xl sm:hidden"
+          >
+            <Filter className="w-3.5 h-3.5" />
+            <span>Фильтры</span>
+          </button>
         </div>
 
-        {/* Category Chips */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+        {/* Category Chips (Mobile Horizontal Native Touch Scroll) */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none snap-x">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold whitespace-nowrap snap-start transition-all ${
                 selectedCategory === cat
-                  ? 'bg-[#00f0ff] text-black shadow-lg shadow-[#00f0ff]/20'
-                  : 'bg-[#080a10] text-slate-400 hover:text-white border border-[#1b2336]'
+                  ? 'bg-[#00f0ff] text-black shadow-md shadow-[#00f0ff]/20'
+                  : 'bg-[#080a10] text-slate-400 border border-[#1b2336]'
               }`}
             >
               {cat}
@@ -113,12 +123,12 @@ export function PoizonCatalog({ products, currencySymbol, telegram }) {
           ))}
         </div>
 
-        {/* Brand & Size Selector Row */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {/* Desktop Brand & Size Selector Row (Hidden on Mobile) */}
+        <div className="hidden sm:grid sm:grid-cols-3 gap-3">
           <select
             value={selectedBrand}
             onChange={(e) => setSelectedBrand(e.target.value)}
-            className="bg-[#080a10] border border-[#1b2336] text-xs text-white rounded-xl px-4 py-2.5 font-bold focus:outline-none cursor-pointer"
+            className="bg-[#080a10] border border-[#1b2336] text-xs text-white rounded-xl px-3 py-2 font-bold focus:outline-none cursor-pointer"
           >
             {brands.map((b) => (
               <option key={b} value={b}>{b}</option>
@@ -128,25 +138,25 @@ export function PoizonCatalog({ products, currencySymbol, telegram }) {
           <select
             value={selectedSize}
             onChange={(e) => setSelectedSize(e.target.value)}
-            className="bg-[#080a10] border border-[#1b2336] text-xs text-white rounded-xl px-4 py-2.5 font-bold focus:outline-none cursor-pointer"
+            className="bg-[#080a10] border border-[#1b2336] text-xs text-white rounded-xl px-3 py-2 font-bold focus:outline-none cursor-pointer"
           >
             {sizes.map((s) => (
               <option key={s} value={s}>{s === 'ВСЕ' ? 'ВСЕ РАЗМЕРЫ' : `РАЗМЕР: ${s}`}</option>
             ))}
           </select>
 
-          <div className="col-span-2 sm:col-span-1 flex items-center justify-end text-xs font-bold text-slate-400">
+          <div className="flex items-center justify-end text-xs font-bold text-slate-400">
             Найдено: <span className="text-[#00f0ff] font-extrabold ml-1">{filteredProducts.length}</span>
           </div>
         </div>
 
       </div>
 
-      {/* 2. DENSE 4-COLUMN MARKETPLACE GRID */}
+      {/* 2. DEDICATED 2-COLUMN MOBILE MARKETPLACE GRID */}
       {filteredProducts.length === 0 ? (
-        <div className="text-center py-16 bg-[#111624] rounded-3xl border border-[#1b2336]">
-          <Search className="w-12 h-12 mx-auto mb-3 opacity-30 text-slate-400" />
-          <h3 className="text-sm font-bold uppercase text-slate-300">Ничего не найдено</h3>
+        <div className="text-center py-12 bg-[#111624] rounded-2xl border border-[#1b2336]">
+          <Search className="w-10 h-10 mx-auto mb-2 opacity-30 text-slate-400" />
+          <h3 className="text-xs font-bold uppercase text-slate-300">Ничего не найдено</h3>
           <button
             onClick={() => {
               setSelectedCategory('ВСЕ')
@@ -154,45 +164,46 @@ export function PoizonCatalog({ products, currencySymbol, telegram }) {
               setSelectedSize('ВСЕ')
               setSearchQuery('')
             }}
-            className="mt-4 px-5 py-2.5 text-xs font-bold bg-[#00f0ff] text-black rounded-xl shadow-md"
+            className="mt-3 px-4 py-2 text-xs font-bold bg-[#00f0ff] text-black rounded-xl"
           >
-            Сбросить все фильтры
+            Сбросить фильтры
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4">
           {filteredProducts.map((p) => {
             const isFav = favorites[p.id]
             return (
               <div
                 key={p.id}
                 onClick={() => setQuickViewProduct(p)}
-                className="bg-[#111624] border border-[#1b2336] hover:border-[#00f0ff] rounded-2xl p-4 space-y-3 group transition-all duration-300 relative flex flex-col justify-between shadow-xl cursor-pointer"
+                className="bg-[#111624] border border-[#1b2336] hover:border-[#00f0ff] rounded-xl p-2.5 sm:p-3.5 space-y-2 group transition-all duration-300 relative flex flex-col justify-between shadow-xl cursor-pointer"
               >
                 {/* Discount Tag */}
                 <div className="flex items-center justify-between">
-                  <span className="px-2 py-0.5 rounded-md bg-[#ff0055] text-white font-black text-[10px]">
+                  <span className="px-1.5 py-0.5 rounded bg-[#ff0055] text-white font-black text-[9px]">
                     -20%
                   </span>
                   <button
                     onClick={(e) => toggleFav(p.id, e)}
                     className="text-slate-400 hover:text-[#00f0ff]"
                   >
-                    <Heart className={`w-4 h-4 ${isFav ? 'fill-[#00f0ff] text-[#00f0ff]' : ''}`} />
+                    <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-[#00f0ff] text-[#00f0ff]' : ''}`} />
                   </button>
                 </div>
 
+                {/* Photo (Aspect Ratio 4/5) */}
                 <div>
-                  <div className="h-44 rounded-xl overflow-hidden bg-[#080a10] flex items-center justify-center p-3 mb-3 border border-[#1b2336]">
-                    <img src={p.image_url} alt={p.title} className="max-h-full max-w-full object-contain group-hover:scale-110 transition-transform duration-300" />
+                  <div className="w-full aspect-[4/5] rounded-lg overflow-hidden bg-[#080a10] flex items-center justify-center p-2 mb-2 border border-[#1b2336]">
+                    <img src={p.image_url} alt={p.title} className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300" />
                   </div>
 
                   <div className="space-y-1">
-                    <div className="text-[10px] font-black text-[#00f0ff] uppercase">{p.brand || 'NIKE'}</div>
-                    <h3 className="font-extrabold text-xs uppercase leading-snug text-white line-clamp-2">{p.title}</h3>
+                    <div className="text-[9px] font-black text-[#00f0ff] uppercase truncate">{p.brand || 'NIKE'}</div>
+                    <h3 className="font-extrabold text-[11px] sm:text-xs uppercase leading-tight text-white line-clamp-2">{p.title}</h3>
                     
                     {p.size && (
-                      <div className="inline-flex items-center gap-1 text-[10px] bg-[#080a10] px-2 py-0.5 rounded text-slate-400 border border-[#1b2336]">
+                      <div className="inline-flex items-center gap-1 text-[9px] bg-[#080a10] px-1.5 py-0.5 rounded text-slate-400 border border-[#1b2336] truncate max-w-full">
                         <Tag className="w-2.5 h-2.5 text-[#00f0ff]" />
                         <span>{p.size}</span>
                       </div>
@@ -200,16 +211,11 @@ export function PoizonCatalog({ products, currencySymbol, telegram }) {
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-[#1b2336] flex items-center justify-between">
+                <div className="pt-2 border-t border-[#1b2336] flex items-center justify-between gap-1">
                   <div>
-                    <span className="font-extrabold text-sm text-[#00f0ff] font-display block">
+                    <span className="font-extrabold text-xs sm:text-sm text-[#00f0ff] font-display block leading-none">
                       {p.price.toLocaleString('ru-RU')} {currencySymbol}
                     </span>
-                    {p.oldPrice && (
-                      <span className="line-through text-slate-500 text-[10px]">
-                        {p.oldPrice.toLocaleString('ru-RU')} {currencySymbol}
-                      </span>
-                    )}
                   </div>
 
                   <button
@@ -217,9 +223,9 @@ export function PoizonCatalog({ products, currencySymbol, telegram }) {
                       e.stopPropagation()
                       handleOrder(p)
                     }}
-                    className="p-2 rounded-xl bg-[#00f0ff] text-black font-extrabold text-xs flex items-center gap-1 hover:bg-[#33f3ff]"
+                    className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-[#00f0ff] text-black font-extrabold text-[10px] flex items-center gap-1"
                   >
-                    <Send className="w-3.5 h-3.5" />
+                    <Send className="w-3 h-3" />
                   </button>
                 </div>
               </div>
@@ -228,33 +234,82 @@ export function PoizonCatalog({ products, currencySymbol, telegram }) {
         </div>
       )}
 
+      {/* MOBILE BOTTOM SHEET FILTER DRAWER */}
+      {isFilterDrawerOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:hidden">
+          <div className="bg-[#111624] border-t border-[#1b2336] w-full p-5 space-y-4 rounded-t-3xl text-white animate-in slide-in-from-bottom duration-200">
+            <div className="flex items-center justify-between border-b border-[#1b2336] pb-3">
+              <h3 className="text-sm font-bold uppercase text-white">Фильтры маркетплейса</h3>
+              <button onClick={() => setIsFilterDrawerOpen(false)} className="p-1 text-slate-400">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 block mb-1">Бренд:</label>
+                <select
+                  value={selectedBrand}
+                  onChange={(e) => setSelectedBrand(e.target.value)}
+                  className="w-full bg-[#080a10] border border-[#1b2336] p-2.5 text-xs text-white rounded-xl"
+                >
+                  {brands.map((b) => (
+                    <option key={b} value={b}>{b}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 block mb-1">Размер:</label>
+                <select
+                  value={selectedSize}
+                  onChange={(e) => setSelectedSize(e.target.value)}
+                  className="w-full bg-[#080a10] border border-[#1b2336] p-2.5 text-xs text-white rounded-xl"
+                >
+                  {sizes.map((s) => (
+                    <option key={s} value={s}>{s === 'ВСЕ' ? 'ВСЕ РАЗМЕРЫ' : `РАЗМЕР: ${s}`}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setIsFilterDrawerOpen(false)}
+              className="w-full py-3 bg-[#00f0ff] text-black font-bold text-xs uppercase rounded-xl"
+            >
+              Применить ({filteredProducts.length})
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* QUICK VIEW MODAL */}
       {quickViewProduct && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#111624] border border-[#1b2336] rounded-3xl max-w-md w-full p-6 space-y-6 text-white relative">
+          <div className="bg-[#111624] border border-[#1b2336] rounded-3xl max-w-sm w-full p-5 space-y-4 text-white relative">
             <button
               onClick={() => setQuickViewProduct(null)}
-              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-full bg-[#080a10]"
+              className="absolute top-3 right-3 p-1.5 text-slate-400 rounded-full bg-[#080a10]"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
 
-            <div className="h-64 rounded-2xl bg-[#080a10] flex items-center justify-center p-4 border border-[#1b2336]">
+            <div className="h-56 rounded-2xl bg-[#080a10] flex items-center justify-center p-3 border border-[#1b2336]">
               <img src={quickViewProduct.image_url} alt="" className="max-h-full max-w-full object-contain" />
             </div>
 
-            <div className="space-y-2">
-              <div className="text-xs font-black text-[#00f0ff] uppercase">{quickViewProduct.brand}</div>
-              <h3 className="text-xl font-extrabold uppercase font-display leading-tight">{quickViewProduct.title}</h3>
-              <div className="text-2xl font-black text-[#00f0ff] font-display">{quickViewProduct.price.toLocaleString('ru-RU')} {currencySymbol}</div>
+            <div className="space-y-1">
+              <div className="text-[10px] font-black text-[#00f0ff] uppercase">{quickViewProduct.brand}</div>
+              <h3 className="text-sm font-extrabold uppercase leading-tight">{quickViewProduct.title}</h3>
+              <div className="text-xl font-black text-[#00f0ff] font-display">{quickViewProduct.price.toLocaleString('ru-RU')} {currencySymbol}</div>
             </div>
 
             <button
               onClick={() => handleOrder(quickViewProduct)}
-              className="w-full py-4 bg-[#00f0ff] text-black font-extrabold text-xs uppercase tracking-wider rounded-2xl flex items-center justify-center gap-2"
+              className="w-full py-3.5 bg-[#00f0ff] text-black font-extrabold text-xs uppercase rounded-xl flex items-center justify-center gap-2"
             >
               <Send className="w-4 h-4" />
-              <span>Купить через Telegram</span>
+              <span>Купить в Telegram</span>
             </button>
           </div>
         </div>
@@ -266,19 +321,19 @@ export function PoizonCatalog({ products, currencySymbol, telegram }) {
 
 export function PoizonFooter({ telegram }) {
   return (
-    <footer className="bg-[#111624] border border-[#1b2336] rounded-3xl p-8 text-center space-y-4 text-white">
-      <div className="flex items-center justify-center gap-2 text-xs font-black text-[#00f0ff] uppercase">
-        <ShieldCheck className="w-4 h-4" />
-        <span>POIZON FAST TELEGRAM MARKETPLACE GATEWAY</span>
+    <footer className="bg-[#111624] border border-[#1b2336] rounded-2xl p-6 text-center space-y-3 text-white">
+      <div className="flex items-center justify-center gap-1.5 text-[10px] sm:text-xs font-bold text-[#00f0ff] uppercase">
+        <ShieldCheck className="w-3.5 h-3.5" />
+        <span>POIZON FAST TELEGRAM MARKETPLACE</span>
       </div>
       <a
         href={`https://t.me/${(telegram || 'admin').replace('@', '')}`}
         target="_blank"
         rel="noreferrer"
-        className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#00f0ff] text-black font-extrabold text-xs uppercase tracking-wider rounded-2xl"
+        className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#00f0ff] text-black font-extrabold text-xs uppercase tracking-wider rounded-xl"
       >
-        <Send className="w-4 h-4" />
-        <span>Купить в Telegram (@{(telegram || 'admin').replace('@', '')})</span>
+        <Send className="w-3.5 h-3.5" />
+        <span>Telegram (@{(telegram || 'admin').replace('@', '')})</span>
       </a>
     </footer>
   )
