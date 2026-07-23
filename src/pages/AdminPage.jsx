@@ -20,9 +20,12 @@ import {
   Wand2,
   Copy as CopyIcon,
   Settings,
-  Image as ImageIcon,
   Heart,
-  Type
+  Type,
+  Smartphone,
+  ChevronDown,
+  Search,
+  ShoppingBag
 } from 'lucide-react'
 import { useStore, BLOCK_LIBRARY, LAYOUT_PRESETS } from '../store/useStore'
 
@@ -221,7 +224,7 @@ export function AdminPage() {
     const updatedTheme = { ...themeForm, telegram: cleanTg }
     updateShop(activeShop.id, { theme_config: updatedTheme })
     setThemeForm(updatedTheme)
-    alert('Настройки брендинга и логотипа сохранены!')
+    alert('Настройки сохранены!')
   }
 
   const handleCreateShop = (e) => {
@@ -247,26 +250,23 @@ export function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans flex flex-col">
+    <div className="min-h-screen bg-[#f8f9fa] text-slate-900 font-sans flex flex-col selection:bg-black selection:text-white">
       
-      {/* Admin Top Header */}
-      <header className="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-4 sm:px-6 py-3.5">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      {/* CREATIWISE STYLE ADMIN HEADER */}
+      <header className="bg-white border-b border-slate-200/80 sticky top-9 z-40 px-4 sm:px-8 py-4 shadow-sm">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-black border border-slate-700 flex items-center justify-center font-black text-white text-lg shadow-md font-display">
-              UB
-            </div>
-            <div>
-              <h1 className="text-xl font-bold font-display text-white flex items-center gap-2">
-                <span>Конструктор Витрины Underbuy Style</span>
-              </h1>
-              <p className="text-xs text-slate-400">Настройка логотипа, сетки блоков, сердечек и карточек товаров</p>
-            </div>
+            <span className="font-extrabold text-2xl tracking-tight text-black font-display">
+              creatiwise<span className="text-black font-extrabold">.</span>
+            </span>
+            <span className="hidden sm:inline px-3 py-1 rounded-full text-xs font-bold bg-black text-white">
+              Конструктор Витрин
+            </span>
           </div>
 
-          {/* Active Shop Switcher & Quick Public Store Link */}
-          <div className="flex items-center gap-3">
+          {/* Active Shop Switcher & Actions */}
+          <div className="flex flex-wrap items-center gap-3">
             <select
               value={activeShopId}
               onChange={(e) => {
@@ -274,7 +274,7 @@ export function AdminPage() {
                 const newShop = shops.find((s) => s.id === e.target.value)
                 if (newShop) setThemeForm(newShop.theme_config)
               }}
-              className="bg-slate-900 border border-slate-700 text-slate-200 text-xs sm:text-sm rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium"
+              className="bg-white border border-slate-300 text-slate-900 text-xs sm:text-sm rounded-full px-4 py-2 font-semibold shadow-sm focus:ring-2 focus:ring-black focus:outline-none"
             >
               {shops.map((s) => (
                 <option key={s.id} value={s.id}>
@@ -285,19 +285,19 @@ export function AdminPage() {
 
             <button
               onClick={() => setShowShopModal(true)}
-              className="inline-flex items-center gap-1 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold shadow-sm transition-all"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-black rounded-full text-xs font-bold transition-all shadow-sm"
             >
               <Plus className="w-4 h-4" />
-              <span>Новый магазин</span>
+              <span>Создать магазин</span>
             </button>
 
             {activeShop && (
               <button
                 onClick={() => navigate(`/s/${activeShop.slug}`)}
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition-all shadow-md"
+                className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-black hover:bg-slate-800 rounded-full transition-all shadow-sm"
               >
                 <Eye className="w-3.5 h-3.5" />
-                <span>Просмотр витрины</span>
+                <span>Открыть Витрину</span>
               </button>
             )}
           </div>
@@ -306,17 +306,17 @@ export function AdminPage() {
       </header>
 
       {/* Main Admin Body */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full flex-grow">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8 w-full flex-grow">
         
-        {/* Share Banner */}
+        {/* Share Link Banner */}
         {activeShop && (
-          <div className="mb-6 p-4 rounded-2xl bg-slate-900 border border-blue-500/30 flex items-center justify-between flex-wrap gap-4 shadow-lg">
+          <div className="mb-8 p-5 rounded-[2rem] bg-white border border-slate-200 shadow-sm flex items-center justify-between flex-wrap gap-4">
             <div className="space-y-1">
-              <div className="text-xs text-blue-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+              <div className="text-xs text-blue-600 font-bold uppercase tracking-wider flex items-center gap-1.5">
                 <Sparkles className="w-4 h-4" />
-                <span>Ссылка на вашу витрину в стиле Underbuy:</span>
+                <span>Прямая ссылка на вашу витрину:</span>
               </div>
-              <div className="text-sm font-mono font-bold text-white">
+              <div className="text-sm font-mono font-bold text-slate-900">
                 {window.location.origin}{window.location.pathname}#/s/{activeShop.slug}
               </div>
             </div>
@@ -324,7 +324,7 @@ export function AdminPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={copyShopUrl}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition-all shadow-md"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-black hover:bg-slate-800 text-white text-xs font-bold rounded-full transition-all shadow-sm"
               >
                 {copiedLink ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                 <span>{copiedLink ? 'Скопировано!' : 'Скопировать ссылку'}</span>
@@ -334,7 +334,7 @@ export function AdminPage() {
                 href={`#/s/${activeShop.slug}`}
                 target="_blank"
                 rel="noreferrer"
-                className="p-2 text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl"
+                className="p-2.5 text-slate-700 hover:text-black bg-slate-100 hover:bg-slate-200 rounded-full transition-colors"
               >
                 <ExternalLink className="w-4 h-4" />
               </a>
@@ -342,232 +342,319 @@ export function AdminPage() {
           </div>
         )}
 
-        {/* Tab Navigation */}
-        <div className="flex border-b border-slate-800 mb-8 space-x-6 overflow-x-auto scrollbar-none">
+        {/* Tab Navigation matching Creatiwise Pill Style */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-8 scrollbar-none">
           <button
             onClick={() => setActiveTab('builder')}
-            className={`pb-4 px-2 text-sm font-bold flex items-center gap-2 border-b-2 whitespace-nowrap transition-colors ${
+            className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
               activeTab === 'builder'
-                ? 'border-blue-500 text-blue-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'bg-black text-white shadow-md'
+                : 'bg-white text-slate-600 hover:text-black border border-slate-200'
             }`}
           >
-            <SlidersHorizontal className="w-4 h-4" />
-            <span>Конструктор Блоков Витрины ({activeBlocks.length})</span>
+            <SlidersHorizontal className="w-3.5 h-3.5 inline-block mr-1.5" />
+            <span>Конструктор Блоков ({activeBlocks.length})</span>
           </button>
 
           <button
             onClick={() => setActiveTab('branding')}
-            className={`pb-4 px-2 text-sm font-bold flex items-center gap-2 border-b-2 whitespace-nowrap transition-colors ${
+            className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
               activeTab === 'branding'
-                ? 'border-blue-500 text-blue-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'bg-black text-white shadow-md'
+                : 'bg-white text-slate-600 hover:text-black border border-slate-200'
             }`}
           >
-            <Type className="w-4 h-4" />
-            <span>Логотип и Настройки Шапки</span>
+            <Type className="w-3.5 h-3.5 inline-block mr-1.5" />
+            <span>Логотип и Шапка</span>
           </button>
 
           <button
             onClick={() => setActiveTab('presets')}
-            className={`pb-4 px-2 text-sm font-bold flex items-center gap-2 border-b-2 whitespace-nowrap transition-colors ${
+            className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
               activeTab === 'presets'
-                ? 'border-blue-500 text-blue-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'bg-black text-white shadow-md'
+                : 'bg-white text-slate-600 hover:text-black border border-slate-200'
             }`}
           >
-            <Wand2 className="w-4 h-4" />
+            <Wand2 className="w-3.5 h-3.5 inline-block mr-1.5" />
             <span>Стиль Underbuy и Пресеты</span>
           </button>
 
           <button
             onClick={() => setActiveTab('products')}
-            className={`pb-4 px-2 text-sm font-bold flex items-center gap-2 border-b-2 whitespace-nowrap transition-colors ${
+            className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
               activeTab === 'products'
-                ? 'border-blue-500 text-blue-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'bg-black text-white shadow-md'
+                : 'bg-white text-slate-600 hover:text-black border border-slate-200'
             }`}
           >
-            <Package className="w-4 h-4" />
+            <Package className="w-3.5 h-3.5 inline-block mr-1.5" />
             <span>Мои Товары ({shopProducts.length})</span>
           </button>
 
           <button
             onClick={() => setActiveTab('telegram')}
-            className={`pb-4 px-2 text-sm font-bold flex items-center gap-2 border-b-2 whitespace-nowrap transition-colors ${
+            className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
               activeTab === 'telegram'
-                ? 'border-blue-500 text-blue-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'bg-black text-white shadow-md'
+                : 'bg-white text-slate-600 hover:text-black border border-slate-200'
             }`}
           >
-            <Send className="w-4 h-4" />
-            <span>Прием Заказов в Telegram</span>
+            <Send className="w-3.5 h-3.5 inline-block mr-1.5" />
+            <span>Заказы в Telegram</span>
           </button>
         </div>
 
-        {/* TAB 1: VISUAL BUILDER */}
+        {/* TAB 1: BUILDER CANVAS + LIVE PHONE MOCKUP PREVIEW */}
         {activeTab === 'builder' && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 p-4 rounded-2xl border border-slate-800">
-              <div>
-                <h2 className="text-lg font-bold text-white">Интерактивный конструктор витрины</h2>
-                <p className="text-xs text-slate-400">Передвигайте блоки, настраивайте колонки карточек и рамочные фильтры Underbuy</p>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            {/* LEFT SIDE: BLOCK EDITOR CONTROLS */}
+            <div className="lg:col-span-7 space-y-6">
+              <div className="flex items-center justify-between bg-white p-5 rounded-[2rem] border border-slate-200 shadow-sm">
+                <div>
+                  <h2 className="text-lg font-extrabold text-slate-900 font-display">Конструктор структуры</h2>
+                  <p className="text-xs text-slate-500">Добавляйте и настраивайте блоки — результат мгновенно виден на макете телефона справа</p>
+                </div>
+
+                <button
+                  onClick={() => handleOpenAddBlockModal(null)}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-black hover:bg-slate-800 text-white text-xs font-bold rounded-full shadow-sm transition-all"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Добавить блок</span>
+                </button>
               </div>
 
-              <button
-                onClick={() => handleOpenAddBlockModal(null)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl shadow-md transition-all"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Добавить блок</span>
-              </button>
-            </div>
-
-            <div className="space-y-4 max-w-4xl mx-auto">
-              {activeBlocks.map((block, idx) => (
-                <React.Fragment key={block.id}>
-                  
-                  <div className="group relative bg-slate-900 border-2 border-slate-800 hover:border-blue-500/60 rounded-3xl p-6 transition-all shadow-xl">
+              {/* Editable Blocks List */}
+              <div className="space-y-4">
+                {activeBlocks.map((block, idx) => (
+                  <React.Fragment key={block.id}>
                     
-                    <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-slate-950/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-slate-700 shadow-md opacity-95">
+                    <div className="group relative bg-white border border-slate-200 rounded-[2rem] p-6 transition-all shadow-sm hover:shadow-md">
+                      
+                      {/* Floating Control Toolbar */}
+                      <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200 shadow-sm">
+                        <button
+                          onClick={() => handleOpenEditBlock(block)}
+                          className="p-1.5 text-blue-600 hover:text-black rounded-full font-bold text-xs flex items-center gap-1"
+                          title="Настроить блок"
+                        >
+                          <Settings className="w-3.5 h-3.5" />
+                          <span>Настроить</span>
+                        </button>
+
+                        <span className="w-px h-4 bg-slate-300"></span>
+
+                        <button onClick={() => moveBlock(idx, -1)} disabled={idx === 0} className="p-1 text-slate-600 hover:text-black disabled:opacity-30">
+                          <ArrowUp className="w-3.5 h-3.5" />
+                        </button>
+                        <button onClick={() => moveBlock(idx, 1)} disabled={idx === activeBlocks.length - 1} className="p-1 text-slate-600 hover:text-black disabled:opacity-30">
+                          <ArrowDown className="w-3.5 h-3.5" />
+                        </button>
+                        <button onClick={() => duplicateBlock(idx)} className="p-1 text-slate-600 hover:text-black">
+                          <CopyIcon className="w-3.5 h-3.5" />
+                        </button>
+                        <button onClick={() => deleteBlock(block.id)} className="p-1 text-red-500 hover:text-red-700">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      {/* Block Information */}
+                      <div className="space-y-2 pr-40">
+                        <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold uppercase tracking-wider">
+                          Блок #{idx + 1}: {block.type}
+                        </div>
+
+                        {block.type === 'categories' && (
+                          <div className="space-y-2 pt-1">
+                            <div className="font-bold text-slate-900 text-sm">Рамочные фильтры [ ВСЕ v ] [ ВСЕ БРЕНДЫ v ]</div>
+                            <div className="flex gap-2">
+                              <div className="border-2 border-black bg-white px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-black flex justify-between items-center w-32">
+                                <span>ВСЕ</span> <span>v</span>
+                              </div>
+                              <div className="border-2 border-black bg-white px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-black flex justify-between items-center w-36">
+                                <span>ВСЕ БРЕНДЫ</span> <span>v</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {block.type === 'products' && (
+                          <div className="space-y-2 pt-1">
+                            <h3 className="text-sm font-extrabold text-slate-900">
+                              Сетка каталога ({block.columns || 2} Колонки | Стиль: {block.cardStyle || 'underbuy'})
+                            </h3>
+                            <p className="text-xs text-slate-500">Товары покупателя выводятся в 2 колонки с сердечками и заглавной типографикой</p>
+                          </div>
+                        )}
+
+                        {block.type === 'banner' && (
+                          <div className="space-y-1">
+                            <h3 className="text-base font-extrabold text-slate-900">{block.title}</h3>
+                            <p className="text-xs text-slate-500">{block.subtitle}</p>
+                          </div>
+                        )}
+
+                        {block.type === 'contact' && (
+                          <div className="space-y-1">
+                            <h3 className="text-base font-extrabold text-slate-900">{block.title}</h3>
+                            <p className="text-xs text-slate-500">{block.subtitle}</p>
+                          </div>
+                        )}
+                      </div>
+
+                    </div>
+
+                    {/* Insert Block Button */}
+                    <div className="flex justify-center my-2">
                       <button
-                        onClick={() => handleOpenEditBlock(block)}
-                        className="p-1.5 text-blue-400 hover:text-white rounded-lg transition-colors flex items-center gap-1 text-xs font-bold"
-                        title="Настроить стиль"
+                        onClick={() => handleOpenAddBlockModal(idx)}
+                        className="px-4 py-1.5 bg-white hover:bg-black text-slate-600 hover:text-white border border-dashed border-slate-300 hover:border-black rounded-full text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
                       >
-                        <Settings className="w-3.5 h-3.5" />
-                        <span>Настроить</span>
-                      </button>
-
-                      <span className="w-px h-4 bg-slate-800"></span>
-
-                      <button onClick={() => moveBlock(idx, -1)} disabled={idx === 0} className="p-1.5 text-slate-400 hover:text-white disabled:opacity-30 rounded-lg">
-                        <ArrowUp className="w-3.5 h-3.5" />
-                      </button>
-                      <button onClick={() => moveBlock(idx, 1)} disabled={idx === activeBlocks.length - 1} className="p-1.5 text-slate-400 hover:text-white disabled:opacity-30 rounded-lg">
-                        <ArrowDown className="w-3.5 h-3.5" />
-                      </button>
-                      <button onClick={() => duplicateBlock(idx)} className="p-1.5 text-slate-400 hover:text-white rounded-lg">
-                        <CopyIcon className="w-3.5 h-3.5" />
-                      </button>
-                      <button onClick={() => deleteBlock(block.id)} className="p-1.5 text-red-400 hover:text-red-300 rounded-lg">
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Вставить блок сюда</span>
                       </button>
                     </div>
 
-                    <div className="space-y-2 pr-36">
-                      <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-blue-600/20 text-blue-400 text-[10px] font-bold uppercase tracking-wider">
-                        Блок #{idx + 1}: {block.type}
-                      </div>
+                  </React.Fragment>
+                ))}
+              </div>
+            </div>
 
-                      {block.type === 'categories' && (
-                        <div className="space-y-2 pt-1">
-                          <div className="font-bold text-white text-sm">Рамочные фильтры [ ВСЕ v ] [ ВСЕ БРЕНДЫ v ]</div>
-                          <div className="flex gap-3">
-                            <div className="border-2 border-slate-700 bg-slate-950 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-300 flex justify-between items-center w-36">
+            {/* RIGHT SIDE: AUTHENTIC LIVE SMARTPHONE MOCKUP PREVIEW */}
+            <div className="lg:col-span-5 flex flex-col items-center lg:sticky lg:top-24">
+              <div className="mb-3 text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                <Smartphone className="w-4 h-4 text-blue-600" />
+                <span>Предпросмотр витрины на телефоне</span>
+              </div>
+
+              {/* iPhone Frame Device */}
+              <div className="w-[330px] h-[640px] bg-black rounded-[3.2rem] p-3 border-4 border-slate-800 shadow-2xl relative overflow-hidden flex flex-col">
+                {/* Dynamic Island / Speaker notch */}
+                <div className="w-28 h-4 bg-black rounded-full mx-auto mb-2 flex-shrink-0 z-30 flex items-center justify-center">
+                  <div className="w-3 h-3 rounded-full bg-slate-900 mr-2"></div>
+                  <div className="w-2 h-2 rounded-full bg-slate-800"></div>
+                </div>
+
+                {/* Inner Viewport Screen */}
+                <div className="flex-1 rounded-[2.5rem] overflow-y-auto bg-white text-black text-xs space-y-4 pb-6 scrollbar-none relative">
+                  
+                  {/* Header */}
+                  <div className="p-4 pb-3 border-b border-slate-200 sticky top-0 bg-white z-20 flex items-center justify-between">
+                    <div className="font-black text-base tracking-tighter uppercase font-display leading-none">
+                      {themeForm.logoText || activeShop?.name || 'under buy'}
+                    </div>
+                    <div className="flex items-center gap-2 text-black">
+                      <Heart className="w-4 h-4" />
+                      <Search className="w-4 h-4" />
+                    </div>
+                  </div>
+
+                  {/* Render Live Blocks */}
+                  <div className="px-3 space-y-4">
+                    {activeBlocks.map((block) => {
+                      if (block.type === 'categories') {
+                        return (
+                          <div key={block.id} className="grid grid-cols-2 gap-2">
+                            <div className="border border-black bg-white px-2 py-1.5 text-[10px] font-bold uppercase flex justify-between items-center">
                               <span>ВСЕ</span> <span>v</span>
                             </div>
-                            <div className="border-2 border-slate-700 bg-slate-950 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-300 flex justify-between items-center w-40">
-                              <span>ВСЕ БРЕНДЫ</span> <span>v</span>
+                            <div className="border border-black bg-white px-2 py-1.5 text-[10px] font-bold uppercase flex justify-between items-center">
+                              <span>БРЕНДЫ</span> <span>v</span>
                             </div>
                           </div>
-                        </div>
-                      )}
+                        )
+                      }
 
-                      {block.type === 'products' && (
-                        <div className="space-y-3 pt-1">
-                          <div className="flex items-center justify-between">
-                            <h3 className="text-base font-bold text-white">Сетка каталога ({block.columns || 2} Колонки | Стиль: {block.cardStyle || 'underbuy'})</h3>
-                          </div>
-                          <div className="grid grid-cols-2 gap-3">
-                            {shopProducts.slice(0, 2).map((p) => (
-                              <div key={p.id} className="bg-white text-black p-3 border border-slate-300 rounded-none relative space-y-1">
-                                <Heart className="w-4 h-4 absolute top-2 right-2 text-black" />
-                                <img src={p.image_url} alt="" className="w-full h-24 object-cover mb-2" />
-                                <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">{p.brand}</div>
-                                <div className="text-[11px] font-extrabold uppercase leading-tight line-clamp-1">{p.title}</div>
-                                <div className="text-sm font-black pt-1">{p.price} ₽</div>
-                                <div className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">{p.category}</div>
+                      if (block.type === 'products') {
+                        return (
+                          <div key={block.id} className="grid grid-cols-2 gap-2">
+                            {shopProducts.slice(0, 4).map((p) => (
+                              <div key={p.id} className="bg-white border border-slate-200 p-2 space-y-1 relative">
+                                <Heart className="w-3 h-3 absolute top-1 right-1 text-black" />
+                                <img src={p.image_url} alt="" className="w-full h-20 object-contain" />
+                                <div className="text-[8px] font-bold text-slate-400 uppercase">{p.brand}</div>
+                                <div className="text-[9px] font-extrabold uppercase leading-none line-clamp-1">{p.title}</div>
+                                <div className="text-xs font-black">{p.price} ₽</div>
                               </div>
                             ))}
                           </div>
-                        </div>
-                      )}
+                        )
+                      }
 
-                      {block.type === 'banner' && (
-                        <div className="space-y-1">
-                          <h3 className="text-lg font-extrabold text-white">{block.title}</h3>
-                          <p className="text-xs text-slate-400">{block.subtitle}</p>
-                        </div>
-                      )}
+                      if (block.type === 'banner') {
+                        return (
+                          <div key={block.id} className="bg-black text-white p-4 rounded-xl text-center space-y-1">
+                            <div className="font-extrabold text-xs uppercase">{block.title}</div>
+                            <div className="text-[9px] text-slate-300">{block.subtitle}</div>
+                          </div>
+                        )
+                      }
 
-                      {block.type === 'contact' && (
-                        <div className="space-y-1">
-                          <h3 className="text-base font-bold text-white">{block.title}</h3>
-                          <p className="text-xs text-slate-400">{block.subtitle}</p>
-                        </div>
-                      )}
-                    </div>
+                      if (block.type === 'contact') {
+                        return (
+                          <div key={block.id} className="bg-slate-900 text-white p-3 rounded-xl text-center space-y-1">
+                            <div className="font-bold text-[10px]">{block.title}</div>
+                            <div className="bg-white text-black px-3 py-1 rounded-full text-[9px] font-bold inline-block">
+                              Заказать в Telegram
+                            </div>
+                          </div>
+                        )
+                      }
 
+                      return null
+                    })}
                   </div>
 
-                  <div className="flex justify-center my-2">
-                    <button
-                      onClick={() => handleOpenAddBlockModal(idx)}
-                      className="px-4 py-1.5 bg-slate-900 hover:bg-blue-600 text-slate-400 hover:text-white border border-dashed border-slate-700 hover:border-blue-500 rounded-full text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Вставить блок сюда</span>
-                    </button>
-                  </div>
-
-                </React.Fragment>
-              ))}
+                </div>
+              </div>
             </div>
+
           </div>
         )}
 
         {/* TAB 2: BRANDING & LOGO EDITOR */}
         {activeTab === 'branding' && (
-          <form onSubmit={handleSaveShopTheme} className="bg-slate-900 p-6 rounded-3xl border border-slate-800 space-y-6 max-w-2xl">
+          <form onSubmit={handleSaveShopTheme} className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-6 max-w-2xl">
             <div>
-              <h2 className="text-xl font-bold text-white font-display">Настройка Логотипа и Шапки Витрины</h2>
-              <p className="text-xs text-slate-400">Настройте отображение вашего логотипа (текст или картинка)</p>
+              <h2 className="text-xl font-bold text-slate-900 font-display">Логотип и Шапка Витрины</h2>
+              <p className="text-xs text-slate-500">Укажите текст логотипа (как "under buy" на скриншоте) или загрузите изображение</p>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Текст логотипа (как "under buy" на скриншоте)
+                <label className="block text-xs font-bold text-slate-800 mb-1">
+                  Текст логотипа (например: under buy)
                 </label>
                 <input
                   type="text"
                   value={themeForm.logoText || activeShop?.name}
                   onChange={(e) => setThemeForm({ ...themeForm, logoText: e.target.value })}
-                  className="bg-slate-950 border border-slate-700 text-sm text-white font-bold rounded-xl px-4 py-3 w-full font-display"
+                  className="bg-slate-50 border border-slate-300 text-sm text-slate-900 font-bold rounded-2xl px-4 py-3 w-full font-display"
                   placeholder="under buy"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  ИЛИ Картинка Логотипа (URL файла логотипа)
+                <label className="block text-xs font-bold text-slate-800 mb-1">
+                  ИЛИ URL Картинки Логотипа
                 </label>
                 <input
                   type="url"
                   value={themeForm.logoUrl || ''}
                   onChange={(e) => setThemeForm({ ...themeForm, logoUrl: e.target.value })}
-                  className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                  className="bg-slate-50 border border-slate-300 text-xs text-slate-900 rounded-2xl px-4 py-3 w-full"
                   placeholder="https://images.unsplash.com/..."
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Валюта каталога</label>
+                <label className="block text-xs font-bold text-slate-800 mb-1">Валюта каталога</label>
                 <select
                   value={themeForm.currencySymbol || '₽'}
                   onChange={(e) => setThemeForm({ ...themeForm, currencySymbol: e.target.value })}
-                  className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                  className="bg-slate-50 border border-slate-300 text-xs text-slate-900 rounded-2xl px-4 py-3 w-full font-bold"
                 >
                   <option value="₽">Рубль (₽)</option>
                   <option value="₾">Лари (₾)</option>
@@ -579,7 +666,7 @@ export function AdminPage() {
 
             <button
               type="submit"
-              className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
+              className="w-full py-3.5 bg-black hover:bg-slate-800 text-white text-xs font-bold rounded-full shadow-md transition-all flex items-center justify-center gap-2"
             >
               <Save className="w-4 h-4" />
               <span>Сохранить настройки логотипа</span>
@@ -591,32 +678,30 @@ export function AdminPage() {
         {activeTab === 'presets' && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-bold text-white">Готовые пресеты визуального оформления</h2>
-              <p className="text-xs text-slate-400">Применяйте готовые концепции дизайна к своему магазину</p>
+              <h2 className="text-xl font-extrabold text-slate-900 font-display">Готовые визуальные концепты</h2>
+              <p className="text-xs text-slate-500">Переключайте стиль витрины в 1 клик</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {LAYOUT_PRESETS.map((preset) => (
                 <div
                   key={preset.id}
-                  className="bg-slate-900 rounded-3xl p-6 border border-slate-800 hover:border-blue-500 transition-all flex flex-col justify-between space-y-4 shadow-xl group"
+                  className="bg-white rounded-[2.5rem] p-6 border border-slate-200 hover:border-black transition-all flex flex-col justify-between space-y-4 shadow-sm group"
                 >
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-bold text-white font-display">{preset.name}</h3>
-                    </div>
-                    <p className="text-xs text-slate-400 leading-relaxed">{preset.desc}</p>
+                    <h3 className="text-lg font-bold text-slate-900 font-display">{preset.name}</h3>
+                    <p className="text-xs text-slate-500 leading-relaxed">{preset.desc}</p>
                   </div>
 
                   <button
                     onClick={() => {
                       applyPresetToShop(activeShop.id, preset.id)
-                      alert(`Дизайн "${preset.name}" применен к вашей витрине!`)
+                      alert(`Дизайн "${preset.name}" применен!`)
                     }}
-                    className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2"
+                    className="w-full py-3.5 bg-black hover:bg-slate-800 text-white font-bold text-xs rounded-full shadow-md transition-all flex items-center justify-center gap-2"
                   >
                     <Wand2 className="w-4 h-4" />
-                    <span>Применить этот пресет</span>
+                    <span>Применить этот стиль</span>
                   </button>
                 </div>
               ))}
@@ -629,29 +714,29 @@ export function AdminPage() {
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-bold text-white">Управление товарами магазина "{activeShop?.name}"</h2>
-                <p className="text-xs text-slate-400">Добавляйте свои наименования, цены, старые цены, фотки, категории и размеры</p>
+                <h2 className="text-xl font-extrabold text-slate-900 font-display">Товары магазина "{activeShop?.name}"</h2>
+                <p className="text-xs text-slate-500">Добавляйте фото, наименования, цены, старые цены и бренды</p>
               </div>
 
               <button
                 onClick={() => handleOpenProductModal()}
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition-all shadow-md"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-black hover:bg-slate-800 text-white text-xs font-bold rounded-full transition-all shadow-md"
               >
                 <Plus className="w-4 h-4" />
-                <span>Добавить новый товар</span>
+                <span>Добавить товар</span>
               </button>
             </div>
 
             {/* Products Grid */}
             {shopProducts.length === 0 ? (
-              <div className="text-center py-16 bg-slate-900 rounded-3xl border border-dashed border-slate-800 space-y-3">
-                <Package className="w-12 h-12 text-slate-500 mx-auto" />
-                <h3 className="text-base font-semibold text-slate-300">В этом магазине пока нет товаров</h3>
+              <div className="text-center py-16 bg-white rounded-[2.5rem] border border-dashed border-slate-300 space-y-3">
+                <Package className="w-12 h-12 text-slate-400 mx-auto" />
+                <h3 className="text-base font-bold text-slate-800">Товаров пока нет</h3>
                 <button
                   onClick={() => handleOpenProductModal()}
-                  className="px-5 py-2.5 text-xs font-bold bg-blue-600 text-white rounded-xl shadow-md"
+                  className="px-6 py-3 text-xs font-bold bg-black text-white rounded-full shadow-md"
                 >
-                  Добавить товар
+                  Добавить первый товар
                 </button>
               </div>
             ) : (
@@ -659,64 +744,51 @@ export function AdminPage() {
                 {shopProducts.map((prod) => (
                   <div
                     key={prod.id}
-                    className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden flex flex-col justify-between group hover:border-slate-700 transition-all shadow-sm"
+                    className="bg-white rounded-3xl border border-slate-200 overflow-hidden flex flex-col justify-between group hover:shadow-md transition-all"
                   >
                     <div>
-                      <div className="h-48 overflow-hidden relative bg-slate-950">
+                      <div className="h-48 overflow-hidden relative bg-slate-50 flex items-center justify-center p-2">
                         <img
                           src={prod.image_url}
                           alt={prod.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
                         />
                         <span
                           className={`absolute top-3 right-3 text-[10px] font-bold px-2.5 py-1 rounded-full ${
-                            prod.is_available ? 'bg-emerald-500/90 text-white' : 'bg-red-500/90 text-white'
+                            prod.is_available ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'
                           }`}
                         >
                           {prod.is_available ? 'В наличии' : 'Распродано'}
                         </span>
-
-                        {prod.brand && (
-                          <span className="absolute bottom-3 left-3 text-[10px] font-bold px-2 py-0.5 rounded bg-black/70 backdrop-blur-md text-white border border-white/10">
-                            {prod.brand}
-                          </span>
-                        )}
                       </div>
 
-                      <div className="p-4 space-y-2">
-                        <div className="text-[11px] text-blue-400 font-semibold uppercase tracking-wider">
-                          {prod.category || 'СУМКИ'}
+                      <div className="p-5 space-y-2">
+                        <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                          {prod.brand || 'БРЕНД'}
                         </div>
 
-                        <h3 className="font-bold text-white text-base leading-snug line-clamp-1 uppercase">
+                        <h3 className="font-extrabold text-slate-900 text-sm uppercase leading-snug line-clamp-2">
                           {prod.title}
                         </h3>
 
-                        <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
-                          <div className="flex items-baseline gap-2">
-                            <span className="font-extrabold text-white text-base font-display">
-                              {prod.price.toLocaleString('ru-RU')} ₽
-                            </span>
-                            {prod.oldPrice && (
-                              <span className="line-through text-slate-500 text-xs">
-                                {prod.oldPrice.toLocaleString('ru-RU')} ₽
-                              </span>
-                            )}
-                          </div>
-                          {prod.size && (
-                            <span className="bg-slate-800 px-2 py-0.5 rounded text-[11px] text-slate-300">
-                              {prod.size}
+                        <div className="flex items-baseline justify-between pt-1">
+                          <span className="font-black text-slate-900 text-base font-display">
+                            {prod.price.toLocaleString('ru-RU')} ₽
+                          </span>
+                          {prod.category && (
+                            <span className="text-[10px] font-semibold text-slate-400 uppercase">
+                              {prod.category}
                             </span>
                           )}
                         </div>
                       </div>
                     </div>
 
-                    <div className="p-4 pt-0 flex items-center justify-end gap-2 border-t border-slate-800 mt-2">
-                      <button onClick={() => handleOpenProductModal(prod)} className="p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-800 rounded-lg">
+                    <div className="p-4 pt-0 flex items-center justify-end gap-2 border-t border-slate-100 mt-2">
+                      <button onClick={() => handleOpenProductModal(prod)} className="p-2 text-slate-600 hover:text-black rounded-full hover:bg-slate-100">
                         <Edit className="w-4 h-4" />
                       </button>
-                      <button onClick={() => deleteProduct(prod.id)} className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg">
+                      <button onClick={() => deleteProduct(prod.id)} className="p-2 text-red-500 hover:text-red-700 rounded-full hover:bg-red-50">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -729,19 +801,19 @@ export function AdminPage() {
 
         {/* TAB 5: TELEGRAM CONFIGURATION */}
         {activeTab === 'telegram' && (
-          <form onSubmit={handleSaveShopTheme} className="bg-slate-900 p-6 rounded-3xl border border-slate-800 space-y-6 max-w-2xl">
+          <form onSubmit={handleSaveShopTheme} className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-6 max-w-2xl">
             <div>
-              <h2 className="text-xl font-bold text-white">Прием заказов в Telegram</h2>
-              <p className="text-xs text-slate-400">Укажите ваш Telegram юзернейм для приема сообщений</p>
+              <h2 className="text-xl font-bold text-slate-900 font-display">Прием заказов в Telegram</h2>
+              <p className="text-xs text-slate-500">Укажите ваш Telegram юзернейм для приема заявок</p>
             </div>
 
-            <div className="bg-blue-600/10 border border-blue-500/40 p-4 rounded-2xl space-y-2">
-              <label className="block text-xs font-bold text-blue-300 flex items-center gap-1.5">
-                <Send className="w-4 h-4 text-blue-400" />
-                <span>Ваш Юзернейм в Telegram для приема заказов:</span>
+            <div className="bg-blue-50 border border-blue-200 p-5 rounded-2xl space-y-2">
+              <label className="block text-xs font-bold text-blue-900 flex items-center gap-1.5">
+                <Send className="w-4 h-4 text-blue-600" />
+                <span>Ваш Юзернейм в Telegram:</span>
               </label>
               <div className="flex items-center">
-                <span className="text-xs text-slate-400 bg-slate-950 px-3 py-2.5 rounded-l-xl border border-r-0 border-slate-700 font-mono">
+                <span className="text-xs text-slate-500 bg-white px-4 py-3 rounded-l-2xl border border-r-0 border-slate-300 font-mono">
                   @
                 </span>
                 <input
@@ -749,15 +821,15 @@ export function AdminPage() {
                   required
                   value={themeForm.telegram || ''}
                   onChange={(e) => setThemeForm({ ...themeForm, telegram: e.target.value })}
-                  className="bg-slate-950 border border-slate-700 text-xs text-white rounded-r-xl px-3 py-2.5 flex-1 font-semibold"
-                  placeholder="reseller_admin"
+                  className="bg-white border border-slate-300 text-xs text-slate-900 rounded-r-2xl px-4 py-3 flex-1 font-bold"
+                  placeholder="underbuy_admin"
                 />
               </div>
             </div>
 
             <button
               type="submit"
-              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl shadow-md transition-all"
+              className="w-full py-3.5 bg-black hover:bg-slate-800 text-white text-xs font-bold rounded-full shadow-md transition-all flex items-center justify-center gap-2"
             >
               <Save className="w-4 h-4" />
               <span>Сохранить юзернейм Telegram</span>
@@ -769,11 +841,11 @@ export function AdminPage() {
 
       {/* ADD BLOCK MODAL */}
       {showAddBlockModal && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 space-y-6 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-[2.5rem] max-w-lg w-full p-6 space-y-6 shadow-2xl relative">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white font-display">Библиотека Блоков</h3>
-              <button onClick={() => setShowAddBlockModal(false)} className="p-1 text-slate-400 hover:text-white">
+              <h3 className="text-lg font-bold text-slate-900 font-display">Библиотека Блоков</h3>
+              <button onClick={() => setShowAddBlockModal(false)} className="p-1.5 text-slate-400 hover:text-black rounded-full bg-slate-100">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -783,15 +855,15 @@ export function AdminPage() {
                 <div
                   key={item.type}
                   onClick={() => handleAddBlockFromLibrary(item)}
-                  className="bg-slate-800/80 hover:bg-slate-800 p-4 rounded-2xl border border-slate-700 hover:border-blue-500 cursor-pointer transition-all flex items-center justify-between group"
+                  className="bg-slate-50 hover:bg-slate-100 p-4 rounded-2xl border border-slate-200 cursor-pointer transition-all flex items-center justify-between group"
                 >
                   <div>
-                    <h4 className="font-bold text-sm text-white group-hover:text-blue-400 transition-colors">
+                    <h4 className="font-bold text-sm text-slate-900 group-hover:text-black">
                       {item.name}
                     </h4>
-                    <p className="text-xs text-slate-400 mt-0.5">{item.desc}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{item.desc}</p>
                   </div>
-                  <Plus className="w-5 h-5 text-slate-400 group-hover:text-blue-400" />
+                  <Plus className="w-5 h-5 text-slate-400 group-hover:text-black" />
                 </div>
               ))}
             </div>
@@ -801,13 +873,13 @@ export function AdminPage() {
 
       {/* BLOCK PROPS EDIT MODAL */}
       {editingBlock && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-[2.5rem] max-w-md w-full p-6 space-y-4 shadow-2xl relative">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white font-display">
+              <h3 className="text-lg font-bold text-slate-900 font-display">
                 Настройка блока [{editingBlock.type}]
               </h3>
-              <button onClick={() => setEditingBlock(null)} className="p-1 text-slate-400 hover:text-white">
+              <button onClick={() => setEditingBlock(null)} className="p-1.5 text-slate-400 hover:text-black rounded-full bg-slate-100">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -815,11 +887,11 @@ export function AdminPage() {
             <form onSubmit={handleSaveBlockProps} className="space-y-4">
               {editingBlock.type === 'categories' && (
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Стиль фильтров</label>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">Стиль фильтров</label>
                   <select
                     value={blockPropsForm.filterStyle || 'underbuy_dropdowns'}
                     onChange={(e) => setBlockPropsForm({ ...blockPropsForm, filterStyle: e.target.value })}
-                    className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                    className="bg-slate-50 border border-slate-300 text-xs text-slate-900 rounded-2xl px-4 py-3 w-full font-bold"
                   >
                     <option value="underbuy_dropdowns">Underbuy Рамочные выпадающие меню [ ВСЕ v ] [ ВСЕ БРЕНДЫ v ]</option>
                     <option value="pill">Округлые чипсы (Pills)</option>
@@ -830,35 +902,35 @@ export function AdminPage() {
               {editingBlock.type === 'products' && (
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">Количество колонок</label>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">Количество колонок</label>
                     <div className="grid grid-cols-3 gap-2">
-                      {[2, 3, 4].map((num) => (
+                      {[1, 2, 3].map((num) => (
                         <button
                           key={num}
                           type="button"
                           onClick={() => setBlockPropsForm({ ...blockPropsForm, columns: num })}
                           className={`py-2 text-xs font-bold rounded-xl border transition-all ${
                             (blockPropsForm.columns || 2) === num
-                              ? 'bg-blue-600 text-white border-blue-500'
-                              : 'bg-slate-950 text-slate-400 border-slate-800'
+                              ? 'bg-black text-white border-black shadow-sm'
+                              : 'bg-slate-50 text-slate-700 border-slate-200'
                           }`}
                         >
-                          {num} Колонки
+                          {num} {num === 1 ? 'Колонка' : 'Колонки'}
                         </button>
                       ))}
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">Стиль карточек товаров</label>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">Стиль карточек товаров</label>
                     <select
                       value={blockPropsForm.cardStyle || 'underbuy'}
                       onChange={(e) => setBlockPropsForm({ ...blockPropsForm, cardStyle: e.target.value })}
-                      className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                      className="bg-slate-50 border border-slate-300 text-xs text-slate-900 rounded-2xl px-4 py-3 w-full font-bold"
                     >
-                      <option value="underbuy">Underbuy (Заглавный бренд, название, сердечко, цена)</option>
-                      <option value="modern">Modern (С тенью и скруглением)</option>
-                      <option value="glass">Glassmorphism (Стеклянный)</option>
+                      <option value="underbuy">Underbuy (Сердечко, заглавный бренд, заглавное название)</option>
+                      <option value="modern">Modern (Скруглённые с тенью)</option>
+                      <option value="glass">Glassmorphism (Стеклянные)</option>
                     </select>
                   </div>
                 </div>
@@ -866,21 +938,21 @@ export function AdminPage() {
 
               {editingBlock.title !== undefined && (
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Заголовок блока</label>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">Заголовок блока</label>
                   <input
                     type="text"
                     value={blockPropsForm.title || ''}
                     onChange={(e) => setBlockPropsForm({ ...blockPropsForm, title: e.target.value })}
-                    className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                    className="bg-slate-50 border border-slate-300 text-xs text-slate-900 rounded-2xl px-4 py-3 w-full font-bold"
                   />
                 </div>
               )}
 
               <div className="pt-2 flex justify-end gap-2">
-                <button type="button" onClick={() => setEditingBlock(null)} className="px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800 rounded-xl">
+                <button type="button" onClick={() => setEditingBlock(null)} className="px-5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-full">
                   Отмена
                 </button>
-                <button type="submit" className="px-5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-md">
+                <button type="submit" className="px-6 py-2.5 text-xs font-bold text-white bg-black hover:bg-slate-800 rounded-full shadow-md">
                   Сохранить
                 </button>
               </div>
@@ -891,49 +963,49 @@ export function AdminPage() {
 
       {/* PRODUCT MODAL */}
       {showProductModal && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 space-y-6 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-[2.5rem] max-w-lg w-full p-6 space-y-6 shadow-2xl relative">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white font-display">
+              <h3 className="text-lg font-bold text-slate-900 font-display">
                 {editingProduct ? 'Редактировать товар' : 'Добавить новый товар'}
               </h3>
-              <button onClick={() => setShowProductModal(false)} className="p-1 text-slate-400 hover:text-white">
+              <button onClick={() => setShowProductModal(false)} className="p-1.5 text-slate-400 hover:text-black rounded-full bg-slate-100">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleSaveProduct} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Название товара</label>
+                <label className="block text-xs font-bold text-slate-800 mb-1">Название товара</label>
                 <input
                   type="text"
                   required
                   value={prodForm.title}
                   onChange={(e) => setProdForm({ ...prodForm, title: e.target.value })}
-                  className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                  className="bg-slate-50 border border-slate-300 text-xs text-slate-900 font-bold rounded-2xl px-4 py-3 w-full uppercase"
                   placeholder="ENFANTS RICHES DEPRIMES TOTE BAG"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Категория</label>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">Категория</label>
                   <input
                     type="text"
                     value={prodForm.category}
                     onChange={(e) => setProdForm({ ...prodForm, category: e.target.value })}
-                    className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full font-mono uppercase"
+                    className="bg-slate-50 border border-slate-300 text-xs text-slate-900 rounded-2xl px-4 py-3 w-full uppercase font-bold"
                     placeholder="СУМКИ, ОДЕЖДА..."
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Бренд (Производитель)</label>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">Бренд (Производитель)</label>
                   <input
                     type="text"
                     value={prodForm.brand}
                     onChange={(e) => setProdForm({ ...prodForm, brand: e.target.value })}
-                    className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full uppercase"
+                    className="bg-slate-50 border border-slate-300 text-xs text-slate-900 rounded-2xl px-4 py-3 w-full uppercase font-bold"
                     placeholder="ENFANTS RICHES DEPRIMES, Y-3..."
                   />
                 </div>
@@ -941,46 +1013,46 @@ export function AdminPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Цена (₽)</label>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">Цена (₽)</label>
                   <input
                     type="number"
                     required
                     value={prodForm.price}
                     onChange={(e) => setProdForm({ ...prodForm, price: e.target.value })}
-                    className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                    className="bg-slate-50 border border-slate-300 text-xs text-slate-900 rounded-2xl px-4 py-3 w-full font-bold"
                     placeholder="6500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Старая цена (зачеркнутая)</label>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">Старая цена (зачеркнутая)</label>
                   <input
                     type="number"
                     value={prodForm.oldPrice}
                     onChange={(e) => setProdForm({ ...prodForm, oldPrice: e.target.value })}
-                    className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                    className="bg-slate-50 border border-slate-300 text-xs text-slate-900 rounded-2xl px-4 py-3 w-full"
                     placeholder="8900"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">URL Фотографии товара</label>
+                <label className="block text-xs font-bold text-slate-800 mb-1">URL Фотографии товара</label>
                 <input
                   type="url"
                   required
                   value={prodForm.image_url}
                   onChange={(e) => setProdForm({ ...prodForm, image_url: e.target.value })}
-                  className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                  className="bg-slate-50 border border-slate-300 text-xs text-slate-900 rounded-2xl px-4 py-3 w-full"
                   placeholder="https://images.unsplash.com/..."
                 />
               </div>
 
               <div className="pt-4 flex justify-end gap-3">
-                <button type="button" onClick={() => setShowProductModal(false)} className="px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800 rounded-xl">
+                <button type="button" onClick={() => setShowProductModal(false)} className="px-5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-full">
                   Отмена
                 </button>
-                <button type="submit" className="px-5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-md">
+                <button type="submit" className="px-6 py-2.5 text-xs font-bold text-white bg-black hover:bg-slate-800 rounded-full shadow-md">
                   Сохранить товар
                 </button>
               </div>
@@ -991,32 +1063,32 @@ export function AdminPage() {
 
       {/* CREATE SHOP MODAL */}
       {showShopModal && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 space-y-6 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-[2.5rem] max-w-md w-full p-6 space-y-6 shadow-2xl relative">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white font-display">Создать витрину в стиле Underbuy</h3>
-              <button onClick={() => setShowShopModal(false)} className="p-1 text-slate-400 hover:text-white">
+              <h3 className="text-lg font-bold text-slate-900 font-display">Создать витрину</h3>
+              <button onClick={() => setShowShopModal(false)} className="p-1.5 text-slate-400 hover:text-black rounded-full bg-slate-100">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleCreateShop} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Название магазина / Текст логотипа</label>
+                <label className="block text-xs font-bold text-slate-800 mb-1">Название магазина / Текст логотипа</label>
                 <input
                   type="text"
                   required
                   value={shopForm.name}
                   onChange={(e) => setShopForm({ ...shopForm, name: e.target.value })}
-                  className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                  className="bg-slate-50 border border-slate-300 text-xs text-slate-900 rounded-2xl px-4 py-3 w-full font-bold"
                   placeholder="under buy"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">URL слаг (адрес витрины)</label>
+                <label className="block text-xs font-bold text-slate-800 mb-1">URL слаг (адрес витрины)</label>
                 <div className="flex items-center">
-                  <span className="text-xs text-slate-500 bg-slate-950 px-3 py-2.5 rounded-l-xl border border-r-0 border-slate-700 font-mono">
+                  <span className="text-xs text-slate-500 bg-slate-100 px-4 py-3 rounded-l-2xl border border-r-0 border-slate-300 font-mono">
                     /#/s/
                   </span>
                   <input
@@ -1024,19 +1096,19 @@ export function AdminPage() {
                     required
                     value={shopForm.slug}
                     onChange={(e) => setShopForm({ ...shopForm, slug: e.target.value })}
-                    className="bg-slate-950 border border-slate-700 text-xs text-white rounded-r-xl px-3 py-2.5 flex-1 font-mono"
+                    className="bg-slate-50 border border-slate-300 text-xs text-slate-900 rounded-r-2xl px-4 py-3 flex-1 font-mono"
                     placeholder="under-buy"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-blue-400 mb-1 flex items-center gap-1">
+                <label className="block text-xs font-bold text-blue-600 mb-1 flex items-center gap-1">
                   <Send className="w-3.5 h-3.5" />
                   <span>Ваш Telegram username для приема заказов</span>
                 </label>
                 <div className="flex items-center">
-                  <span className="text-xs text-slate-500 bg-slate-950 px-3 py-2.5 rounded-l-xl border border-r-0 border-slate-700 font-mono">
+                  <span className="text-xs text-slate-500 bg-slate-100 px-4 py-3 rounded-l-2xl border border-r-0 border-slate-300 font-mono">
                     @
                   </span>
                   <input
@@ -1044,17 +1116,17 @@ export function AdminPage() {
                     required
                     value={shopForm.telegram}
                     onChange={(e) => setShopForm({ ...shopForm, telegram: e.target.value })}
-                    className="bg-slate-950 border border-slate-700 text-xs text-white rounded-r-xl px-3 py-2.5 flex-1 font-semibold"
+                    className="bg-slate-50 border border-slate-300 text-xs text-slate-900 rounded-r-2xl px-4 py-3 flex-1 font-bold"
                     placeholder="underbuy_admin"
                   />
                 </div>
               </div>
 
               <div className="pt-4 flex justify-end gap-3">
-                <button type="button" onClick={() => setShowShopModal(false)} className="px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800 rounded-xl">
+                <button type="button" onClick={() => setShowShopModal(false)} className="px-5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-full">
                   Отмена
                 </button>
-                <button type="submit" className="px-5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-md">
+                <button type="submit" className="px-6 py-2.5 text-xs font-bold text-white bg-black hover:bg-slate-800 rounded-full shadow-md">
                   Создать витрину
                 </button>
               </div>
