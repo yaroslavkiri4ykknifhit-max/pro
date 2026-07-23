@@ -18,9 +18,13 @@ import {
   ArrowDown,
   SlidersHorizontal,
   Wand2,
-  ShoppingBag
+  Copy as CopyIcon,
+  Settings,
+  LayoutGrid,
+  Columns,
+  Maximize2
 } from 'lucide-react'
-import { useStore, THEME_PRESETS } from '../store/useStore'
+import { useStore, BLOCK_LIBRARY, LAYOUT_PRESETS } from '../store/useStore'
 
 export function AdminPage() {
   const navigate = useNavigate()
@@ -38,25 +42,23 @@ export function AdminPage() {
     deleteProduct
   } = useStore()
 
-  const [activeTab, setActiveTab] = useState('presets') // 'presets' | 'blocks' | 'products' | 'telegram'
+  const [activeTab, setActiveTab] = useState('builder') // 'builder' | 'presets' | 'products' | 'telegram'
+  const [showAddBlockModal, setShowAddBlockModal] = useState(false)
+  const [insertIndex, setInsertIndex] = useState(null)
+
   const [showProductModal, setShowProductModal] = useState(false)
   const [showShopModal, setShowShopModal] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
   const [copiedLink, setCopiedLink] = useState(false)
 
-  // Current selected shop
+  // Selected shop
   const activeShop = shops.find((s) => s.id === activeShopId) || shops[0]
   const shopProducts = products.filter((p) => p.shop_id === activeShop?.id)
   const activeBlocks = activeShop?.blocks || []
 
-  // Block creation/edit state
+  // Block settings modal state
   const [editingBlock, setEditingBlock] = useState(null)
-  const [blockForm, setBlockForm] = useState({
-    title: '',
-    subtitle: '',
-    imageUrl: '',
-    buttonText: ''
-  })
+  const [blockPropsForm, setBlockPropsForm] = useState({})
 
   // Product Form State
   const [prodForm, setProdForm] = useState({
@@ -79,9 +81,10 @@ export function AdminPage() {
 
   // Theme Form State
   const [themeForm, setThemeForm] = useState(
-    activeShop?.theme_config || THEME_PRESETS[0].config
+    activeShop?.theme_config || LAYOUT_PRESETS[0].config
   )
 
+  // Reordering Handlers
   const moveBlock = (index, direction) => {
     if (!activeShop) return
     const newBlocks = [...activeBlocks]
@@ -92,56 +95,69 @@ export function AdminPage() {
     updateShopBlocks(activeShop.id, newBlocks)
   }
 
+  const duplicateBlock = (index) => {
+    if (!activeShop) return
+    const blockToCopy = activeBlocks[index]
+    const copied = {
+      ...JSON.parse(JSON.stringify(blockToCopy)),
+      id: 'b-' + Date.now()
+    }
+    const newBlocks = [...activeBlocks]
+    newBlocks.splice(index + 1, 0, copied)
+    updateShopBlocks(activeShop.id, newBlocks)
+  }
+
   const deleteBlock = (blockId) => {
     if (!activeShop) return
     if (activeBlocks.length <= 1) {
-      alert('В магазине должен оставаться хотя бы один блок!')
+      alert('В витрине должен оставаться хотя бы один блок!')
       return
     }
     const newBlocks = activeBlocks.filter((b) => b.id !== blockId)
     updateShopBlocks(activeShop.id, newBlocks)
   }
 
-  const handleAddBlock = (type) => {
+  const handleOpenAddBlockModal = (atIndex = null) => {
+    setInsertIndex(atIndex)
+    setShowAddBlockModal(true)
+  }
+
+  const handleAddBlockFromLibrary = (blockTypeItem) => {
     if (!activeShop) return
-    let newBlock = { id: 'b-' + Date.now(), type, title: 'Новый блок' }
-    if (type === 'banner') {
-      newBlock = { id: 'b-' + Date.now(), type, title: 'Новая коллекция', subtitle: 'Описание баннера', imageUrl: '' }
-    } else if (type === 'promo') {
-      newBlock = {
-        id: 'b-' + Date.now(),
-        type,
-        title: '🔥 Спецпредложение',
-        subtitle: 'Скидка на вторую позицию',
-        imageUrl: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1000&q=80',
-        buttonText: 'Выбрать'
-      }
-    } else if (type === 'contact') {
-      newBlock = { id: 'b-' + Date.now(), type, title: 'Задайте вопрос в Telegram', subtitle: 'Отвечаем за 2 минуты' }
+    const newBlock = {
+      id: 'b-' + Date.now(),
+      type: blockTypeItem.type,
+      ...JSON.parse(JSON.stringify(blockTypeItem.defaultProps))
     }
-    updateShopBlocks(activeShop.id, [...activeBlocks, newBlock])
+
+    const newBlocks = [...activeBlocks]
+    if (insertIndex !== null && insertIndex >= 0) {
+      newBlocks.splice(insertIndex + 1, 0, newBlock)
+    } else {
+      newBlocks.push(newBlock)
+    }
+
+    updateShopBlocks(activeShop.id, newBlocks)
+    setShowAddBlockModal(false)
+    setInsertIndex(null)
   }
 
   const handleOpenEditBlock = (block) => {
     setEditingBlock(block)
-    setBlockForm({
-      title: block.title || '',
-      subtitle: block.subtitle || '',
-      imageUrl: block.imageUrl || '',
-      buttonText: block.buttonText || ''
-    })
+    setBlockPropsForm({ ...block })
   }
 
-  const handleSaveBlock = (e) => {
+  const handleSaveBlockProps = (e) => {
     e.preventDefault()
     if (!editingBlock || !activeShop) return
     const updated = activeBlocks.map((b) =>
-      b.id === editingBlock.id ? { ...b, ...blockForm } : b
+      b.id === editingBlock.id ? { ...blockPropsForm } : b
     )
     updateShopBlocks(activeShop.id, updated)
     setEditingBlock(null)
   }
 
+  // Product CRUD
   const handleOpenProductModal = (product = null) => {
     if (product) {
       setEditingProduct(product)
@@ -198,10 +214,9 @@ export function AdminPage() {
     if (!activeShop) return
     const cleanTg = (themeForm.telegram || '').replace('@', '').trim()
     const updatedTheme = { ...themeForm, telegram: cleanTg }
-
     updateShop(activeShop.id, { theme_config: updatedTheme })
     setThemeForm(updatedTheme)
-    alert('Настройки Telegram и цвета сохранены!')
+    alert('Настройки Telegram сохранены!')
   }
 
   const handleCreateShop = (e) => {
@@ -227,10 +242,10 @@ export function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 font-sans flex flex-col">
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans flex flex-col">
       
       {/* Admin Top Header */}
-      <header className="bg-slate-800/90 backdrop-blur-md border-b border-slate-700 sticky top-0 z-40 px-4 sm:px-6 py-4">
+      <header className="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-4 sm:px-6 py-3.5">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           
           <div className="flex items-center gap-3">
@@ -238,8 +253,10 @@ export function AdminPage() {
               <Store className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-xl font-bold font-display text-white">Конструктор Витрины Ресейлера</h1>
-              <p className="text-xs text-slate-400">Шаблоны модных брендов с товарами + Кастомные блоки</p>
+              <h1 className="text-xl font-bold font-display text-white flex items-center gap-2">
+                <span>Конструктор Витрин (Tilda-Style)</span>
+              </h1>
+              <p className="text-xs text-slate-400">Полный контроль над сеткой блоков, стилем каталога и дизайна</p>
             </div>
           </div>
 
@@ -266,7 +283,7 @@ export function AdminPage() {
               className="inline-flex items-center gap-1 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold shadow-sm transition-all"
             >
               <Plus className="w-4 h-4" />
-              <span>Создать магазин</span>
+              <span>Новый магазин</span>
             </button>
 
             {activeShop && (
@@ -275,7 +292,7 @@ export function AdminPage() {
                 className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition-all shadow-md"
               >
                 <Eye className="w-3.5 h-3.5" />
-                <span>Открыть витрину</span>
+                <span>Просмотр витрины</span>
               </button>
             )}
           </div>
@@ -284,15 +301,15 @@ export function AdminPage() {
       </header>
 
       {/* Main Admin Body */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 w-full flex-grow">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full flex-grow">
         
-        {/* Quick Link Share Banner */}
+        {/* Share Banner */}
         {activeShop && (
-          <div className="mb-6 p-4 rounded-2xl bg-slate-800/90 border border-blue-500/30 flex items-center justify-between flex-wrap gap-4 shadow-lg">
+          <div className="mb-6 p-4 rounded-2xl bg-slate-900 border border-blue-500/30 flex items-center justify-between flex-wrap gap-4 shadow-lg">
             <div className="space-y-1">
               <div className="text-xs text-blue-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
                 <Sparkles className="w-4 h-4" />
-                <span>Ссылка на вашу витрину для покупателей:</span>
+                <span>Ссылка на готовую витрину:</span>
               </div>
               <div className="text-sm font-mono font-bold text-white">
                 {window.location.origin}{window.location.pathname}#/s/{activeShop.slug}
@@ -312,8 +329,7 @@ export function AdminPage() {
                 href={`#/s/${activeShop.slug}`}
                 target="_blank"
                 rel="noreferrer"
-                className="p-2 text-slate-300 hover:text-white bg-slate-700 hover:bg-slate-600 rounded-xl"
-                title="Открыть витрину"
+                className="p-2 text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl"
               >
                 <ExternalLink className="w-4 h-4" />
               </a>
@@ -324,6 +340,18 @@ export function AdminPage() {
         {/* Tab Navigation */}
         <div className="flex border-b border-slate-800 mb-8 space-x-6 overflow-x-auto scrollbar-none">
           <button
+            onClick={() => setActiveTab('builder')}
+            className={`pb-4 px-2 text-sm font-bold flex items-center gap-2 border-b-2 whitespace-nowrap transition-colors ${
+              activeTab === 'builder'
+                ? 'border-blue-500 text-blue-400'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+            <span>Конструктор Блоков Витрины ({activeBlocks.length})</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('presets')}
             className={`pb-4 px-2 text-sm font-bold flex items-center gap-2 border-b-2 whitespace-nowrap transition-colors ${
               activeTab === 'presets'
@@ -332,19 +360,7 @@ export function AdminPage() {
             }`}
           >
             <Wand2 className="w-4 h-4" />
-            <span>Шаблоны Брендов и Готовые Каталоги</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('blocks')}
-            className={`pb-4 px-2 text-sm font-bold flex items-center gap-2 border-b-2 whitespace-nowrap transition-colors ${
-              activeTab === 'blocks'
-                ? 'border-blue-500 text-blue-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <SlidersHorizontal className="w-4 h-4" />
-            <span>Конструктор Блоков ({activeBlocks.length})</span>
+            <span>Дизайны и Сетки Брендов</span>
           </button>
 
           <button
@@ -356,7 +372,7 @@ export function AdminPage() {
             }`}
           >
             <Package className="w-4 h-4" />
-            <span>Товары ({shopProducts.length})</span>
+            <span>Мои Товары ({shopProducts.length})</span>
           </button>
 
           <button
@@ -368,214 +384,213 @@ export function AdminPage() {
             }`}
           >
             <Send className="w-4 h-4" />
-            <span>Настройка Telegram</span>
+            <span>Прием Заказов в Telegram</span>
           </button>
         </div>
 
-        {/* TAB 1: BRAND PRESETS WITH VISUAL PREVIEWS & AUTO PRODUCT POPULATION */}
-        {activeTab === 'presets' && (
+        {/* TAB 1: WYSIWYG VISUAL PAGE BUILDER */}
+        {activeTab === 'builder' && (
           <div className="space-y-6">
-            <div>
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <span>Готовые витрины брендов с реальными товарами</span>
-              </h2>
-              <p className="text-xs text-slate-400">
-                Выберите бренд — система автоматически загрузит дизайн, баннеры, структуру блоков и оригинальные товары из каталога
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {THEME_PRESETS.map((preset) => (
-                <div
-                  key={preset.id}
-                  className="bg-slate-800 rounded-3xl overflow-hidden border border-slate-700/80 hover:border-blue-500 transition-all flex flex-col justify-between shadow-xl group"
-                >
-                  <div>
-                    {/* Visual Card Image Preview */}
-                    <div className="h-48 overflow-hidden relative bg-slate-950">
-                      <img
-                        src={preset.previewImage}
-                        alt={preset.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
-                      <span className="absolute top-3 right-3 text-[10px] font-bold px-3 py-1 rounded-full bg-black/80 backdrop-blur-md text-white border border-white/20">
-                        {preset.sampleProducts.length} товаров в наборе
-                      </span>
-                    </div>
-
-                    {/* Description */}
-                    <div className="p-6 space-y-4">
-                      <div>
-                        <h3 className="text-lg font-bold text-white font-display mb-1">{preset.name}</h3>
-                        <p className="text-xs text-slate-400 leading-relaxed">{preset.desc}</p>
-                      </div>
-
-                      {/* Sample Products Included in this Preset */}
-                      <div className="space-y-2 pt-2 border-t border-slate-700/60">
-                        <span className="text-[11px] font-bold text-blue-400 flex items-center gap-1">
-                          <ShoppingBag className="w-3.5 h-3.5" />
-                          <span>Товары, которые будут добавлены:</span>
-                        </span>
-                        <div className="space-y-1">
-                          {preset.sampleProducts.map((sp, i) => (
-                            <div key={i} className="text-xs text-slate-300 flex items-center justify-between">
-                              <span className="truncate max-w-[200px]">• {sp.title}</span>
-                              <span className="font-bold text-slate-400">{sp.price.toLocaleString('ru-RU')} ₽</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Apply Preset Action Button */}
-                  <div className="p-6 pt-0">
-                    <button
-                      onClick={() => {
-                        if (window.confirm(`Загрузить шаблон "${preset.name}" и обновить товары в магазине "${activeShop?.name}"?`)) {
-                          applyPresetToShop(activeShop.id, preset.id)
-                          alert(`Шаблон "${preset.name}" с оригинальными товарами успешно применен!`)
-                        }
-                      }}
-                      className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2"
-                    >
-                      <Wand2 className="w-4 h-4" />
-                      <span>Применить шаблон и загрузить товары</span>
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* TAB 2: VISUAL BLOCK BUILDER */}
-        {activeTab === 'blocks' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            <div className="lg:col-span-7 space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-xl font-bold text-white">Управление блоками витрины</h2>
-                  <p className="text-xs text-slate-400">Меняйте порядок блоков, редактируйте тексты и вставляйте картинки</p>
-                </div>
-
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleAddBlock('banner')}
-                    className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white text-xs font-semibold rounded-xl"
-                  >
-                    + Баннер
-                  </button>
-                  <button
-                    onClick={() => handleAddBlock('promo')}
-                    className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white text-xs font-semibold rounded-xl"
-                  >
-                    + Промо-картинка
-                  </button>
-                </div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 p-4 rounded-2xl border border-slate-800">
+              <div>
+                <h2 className="text-lg font-bold text-white">Интерактивный холст витрины</h2>
+                <p className="text-xs text-slate-400">Нажимайте на блоки для изменения стиля, параметров сетки, текста и карточек</p>
               </div>
 
-              <div className="space-y-4">
-                {activeBlocks.map((block, idx) => (
-                  <div
-                    key={block.id}
-                    className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 flex items-center justify-between gap-4 group hover:border-slate-600 transition-all shadow-sm"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl bg-slate-900 flex items-center justify-center font-bold text-slate-400 text-xs">
-                        #{idx + 1}
-                      </div>
+              <button
+                onClick={() => handleOpenAddBlockModal(null)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl shadow-md transition-all"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Добавить блок в витрину</span>
+              </button>
+            </div>
 
-                      <div>
-                        <div className="text-sm font-bold text-white flex items-center gap-2">
-                          <span>
-                            {block.type === 'banner' && '🖼️ Блок: Герой-Баннер'}
-                            {block.type === 'categories' && '🏷️ Блок: Чипсы Категорий & Поиск'}
-                            {block.type === 'products' && '📦 Блок: Каталог Товаров'}
-                            {block.type === 'promo' && '📸 Блок: Акционное Изображение'}
-                            {block.type === 'contact' && '💬 Блок: Заказ в Telegram'}
-                          </span>
-                        </div>
-                        <p className="text-xs text-slate-400 line-clamp-1">{block.title}</p>
-                      </div>
-                    </div>
+            {/* Visual Builder Canvas */}
+            <div className="space-y-4 max-w-4xl mx-auto">
+              {activeBlocks.map((block, idx) => (
+                <React.Fragment key={block.id}>
+                  
+                  {/* Block Canvas Card */}
+                  <div className="group relative bg-slate-900 border-2 border-slate-800 hover:border-blue-500/60 rounded-3xl p-6 transition-all shadow-xl">
+                    
+                    {/* Floating Controls Toolbar */}
+                    <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-slate-950/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-slate-700 shadow-md opacity-95">
+                      <button
+                        onClick={() => handleOpenEditBlock(block)}
+                        className="p-1.5 text-blue-400 hover:text-white rounded-lg transition-colors flex items-center gap-1 text-xs font-bold"
+                        title="Настроить стиль и параметры"
+                      >
+                        <Settings className="w-3.5 h-3.5" />
+                        <span>Настроить</span>
+                      </button>
 
-                    <div className="flex items-center gap-2">
+                      <span className="w-px h-4 bg-slate-800"></span>
+
                       <button
                         onClick={() => moveBlock(idx, -1)}
                         disabled={idx === 0}
-                        className="p-1.5 text-slate-400 hover:text-white disabled:opacity-30 rounded-lg hover:bg-slate-700"
+                        className="p-1.5 text-slate-400 hover:text-white disabled:opacity-30 rounded-lg"
                         title="Вверх"
                       >
-                        <ArrowUp className="w-4 h-4" />
+                        <ArrowUp className="w-3.5 h-3.5" />
                       </button>
 
                       <button
                         onClick={() => moveBlock(idx, 1)}
                         disabled={idx === activeBlocks.length - 1}
-                        className="p-1.5 text-slate-400 hover:text-white disabled:opacity-30 rounded-lg hover:bg-slate-700"
+                        className="p-1.5 text-slate-400 hover:text-white disabled:opacity-30 rounded-lg"
                         title="Вниз"
                       >
-                        <ArrowDown className="w-4 h-4" />
+                        <ArrowDown className="w-3.5 h-3.5" />
                       </button>
 
-                      {(block.type === 'banner' || block.type === 'promo' || block.type === 'contact') && (
-                        <button
-                          onClick={() => handleOpenEditBlock(block)}
-                          className="p-1.5 text-blue-400 hover:text-blue-300 rounded-lg hover:bg-slate-700"
-                          title="Редактировать"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                      )}
+                      <button
+                        onClick={() => duplicateBlock(idx)}
+                        className="p-1.5 text-slate-400 hover:text-white rounded-lg"
+                        title="Дублировать блок"
+                      >
+                        <CopyIcon className="w-3.5 h-3.5" />
+                      </button>
 
                       <button
                         onClick={() => deleteBlock(block.id)}
-                        className="p-1.5 text-red-400 hover:text-red-300 rounded-lg hover:bg-slate-700"
-                        title="Удалить"
+                        className="p-1.5 text-red-400 hover:text-red-300 rounded-lg"
+                        title="Удалить блок"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </div>
 
-            {/* Right Live Mini Preview Frame */}
-            <div className="lg:col-span-5 space-y-4">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <Eye className="w-4 h-4 text-blue-400" />
-                <span>Предпросмотр блочной структуры</span>
-              </h3>
+                    {/* Block Preview Content */}
+                    <div className="space-y-2 pr-36">
+                      <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-blue-600/20 text-blue-400 text-[10px] font-bold uppercase tracking-wider">
+                        Блок #{idx + 1}: {block.type}
+                      </div>
 
-              <div className="mx-auto w-[320px] h-[580px] bg-slate-950 rounded-[3rem] p-3 border-4 border-slate-700 shadow-2xl relative overflow-hidden flex flex-col">
-                <div className="w-24 h-4 bg-slate-800 rounded-full mx-auto mb-2 flex-shrink-0"></div>
+                      {block.type === 'banner' && (
+                        <div className="space-y-1">
+                          <h3 className="text-xl font-extrabold text-white">{block.title}</h3>
+                          <p className="text-xs text-slate-400">{block.subtitle}</p>
+                          {block.imageUrl && (
+                            <img src={block.imageUrl} alt="" className="w-full h-32 object-cover rounded-xl mt-2" />
+                          )}
+                        </div>
+                      )}
 
-                <div
-                  className="flex-1 rounded-[2.2rem] overflow-y-auto p-4 space-y-3 text-slate-100 text-xs"
-                  style={{
-                    backgroundColor: activeShop?.theme_config?.backgroundColor || '#090a0f',
-                    color: activeShop?.theme_config?.textColor || '#ffffff'
-                  }}
-                >
-                  {activeBlocks.map((b) => (
-                    <div
-                      key={b.id}
-                      className="p-3 rounded-2xl border border-white/15 bg-white/5 space-y-1"
-                    >
-                      <div className="text-[10px] font-bold uppercase text-blue-400">[{b.type}]</div>
-                      <div className="font-bold text-xs">{b.title}</div>
-                      {b.imageUrl && (
-                        <img src={b.imageUrl} alt="" className="w-full h-16 object-cover rounded-lg mt-1" />
+                      {block.type === 'categories' && (
+                        <div className="text-xs text-slate-300 space-y-1">
+                          <div className="font-bold text-white">Чипсы категорий, фильтр брендов и поисковая строка</div>
+                          <div className="text-[11px] text-slate-500">Стиль чипсов: {block.chipStyle || 'pill'}</div>
+                        </div>
+                      )}
+
+                      {block.type === 'products' && (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-bold text-white">{block.title || 'Сетка товаров'}</h3>
+                            <span className="text-xs font-bold text-blue-400">
+                              Сетка: {block.columns || 3} Колонки | Стиль: {block.cardStyle || 'modern'}
+                            </span>
+                          </div>
+                          {/* Mini Grid representation */}
+                          <div className={`grid gap-2 pt-2 ${block.columns === 2 ? 'grid-cols-2' : block.columns === 4 ? 'grid-cols-4' : 'grid-cols-3'}`}>
+                            {shopProducts.slice(0, block.columns || 3).map((p) => (
+                              <div key={p.id} className="bg-slate-800 p-2 rounded-xl text-[10px] border border-slate-700">
+                                <img src={p.image_url} alt="" className="w-full h-12 object-cover rounded mb-1" />
+                                <div className="font-bold line-clamp-1">{p.title}</div>
+                                <div className="text-blue-400 font-bold">{p.price} ₽</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {block.type === 'promo' && (
+                        <div className="space-y-1">
+                          <h3 className="text-lg font-bold text-white">{block.title}</h3>
+                          <p className="text-xs text-slate-400">{block.subtitle}</p>
+                          {block.imageUrl && (
+                            <img src={block.imageUrl} alt="" className="w-full h-28 object-cover rounded-xl mt-2" />
+                          )}
+                        </div>
+                      )}
+
+                      {block.type === 'text_note' && (
+                        <div className="space-y-1">
+                          <h3 className="text-base font-bold text-white">{block.title}</h3>
+                          <p className="text-xs text-slate-300 italic">{block.text}</p>
+                        </div>
+                      )}
+
+                      {block.type === 'contact' && (
+                        <div className="space-y-1">
+                          <h3 className="text-base font-bold text-white">{block.title}</h3>
+                          <p className="text-xs text-slate-400">{block.subtitle}</p>
+                        </div>
                       )}
                     </div>
-                  ))}
-                </div>
-              </div>
+
+                  </div>
+
+                  {/* Add Block Button between Blocks */}
+                  <div className="flex justify-center my-2">
+                    <button
+                      onClick={() => handleOpenAddBlockModal(idx)}
+                      className="px-4 py-1.5 bg-slate-900 hover:bg-blue-600 text-slate-400 hover:text-white border border-dashed border-slate-700 hover:border-blue-500 rounded-full text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Вставить блок сюда</span>
+                    </button>
+                  </div>
+
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: BRAND LAYOUT PRESETS */}
+        {activeTab === 'presets' && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xl font-bold text-white">Готовые концепции дизайна и сеток каталогов</h2>
+              <p className="text-xs text-slate-400">Выберите готовый стиль сетки (2 колонки, 3 колонки, Balenciaga, Supreme, Apple) без потери ваших товаров</p>
             </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {LAYOUT_PRESETS.map((preset) => (
+                <div
+                  key={preset.id}
+                  className="bg-slate-900 rounded-3xl p-6 border border-slate-800 hover:border-blue-500 transition-all flex flex-col justify-between space-y-4 shadow-xl group"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-bold text-white font-display">{preset.name}</h3>
+                    </div>
+                    <p className="text-xs text-slate-400 leading-relaxed">{preset.desc}</p>
+
+                    <div className="flex items-center gap-2 pt-2 border-t border-slate-800">
+                      <span className="text-xs text-slate-400">Палитра концепции:</span>
+                      <span className="w-5 h-5 rounded-full border border-white/20" style={{ backgroundColor: preset.config.backgroundColor }}></span>
+                      <span className="w-5 h-5 rounded-full border border-white/20" style={{ backgroundColor: preset.config.cardBg }}></span>
+                      <span className="w-5 h-5 rounded-full border border-white/20" style={{ backgroundColor: preset.config.primaryColor }}></span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      applyPresetToShop(activeShop.id, preset.id)
+                      alert(`Дизайн и сетка "${preset.name}" применены к вашей витрине!`)
+                    }}
+                    className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2"
+                  >
+                    <Wand2 className="w-4 h-4" />
+                    <span>Применить этот концепт дизайна</span>
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
@@ -584,8 +599,8 @@ export function AdminPage() {
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-bold text-white">Каталог товаров "{activeShop?.name}"</h2>
-                <p className="text-xs text-slate-400">Добавляйте свои товары или выберите готовую коллекцию во вкладке "Шаблоны Брендов"</p>
+                <h2 className="text-xl font-bold text-white">Управление товарами магазина "{activeShop?.name}"</h2>
+                <p className="text-xs text-slate-400">Добавляйте свои наименования, цены, фотки, категории и размеры</p>
               </div>
 
               <button
@@ -593,39 +608,31 @@ export function AdminPage() {
                 className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition-all shadow-md"
               >
                 <Plus className="w-4 h-4" />
-                <span>Добавить товар</span>
+                <span>Добавить новый товар</span>
               </button>
             </div>
 
             {/* Products Grid */}
             {shopProducts.length === 0 ? (
-              <div className="text-center py-16 bg-slate-800/40 rounded-3xl border border-dashed border-slate-700 space-y-3">
+              <div className="text-center py-16 bg-slate-900 rounded-3xl border border-dashed border-slate-800 space-y-3">
                 <Package className="w-12 h-12 text-slate-500 mx-auto" />
                 <h3 className="text-base font-semibold text-slate-300">В этом магазине пока нет товаров</h3>
-                <div className="flex justify-center gap-3 pt-2">
-                  <button
-                    onClick={() => setActiveTab('presets')}
-                    className="px-4 py-2 text-xs font-bold bg-blue-600 text-white rounded-xl shadow-md"
-                  >
-                    Загрузить готовый каталог бренда
-                  </button>
-                  <button
-                    onClick={() => handleOpenProductModal()}
-                    className="px-4 py-2 text-xs font-semibold bg-slate-700 text-white rounded-xl"
-                  >
-                    Добавить вручную
-                  </button>
-                </div>
+                <button
+                  onClick={() => handleOpenProductModal()}
+                  className="px-5 py-2.5 text-xs font-bold bg-blue-600 text-white rounded-xl shadow-md"
+                >
+                  Добавить товар
+                </button>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {shopProducts.map((prod) => (
                   <div
                     key={prod.id}
-                    className="bg-slate-800 rounded-2xl border border-slate-700/80 overflow-hidden flex flex-col justify-between group hover:border-slate-600 transition-all shadow-sm"
+                    className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden flex flex-col justify-between group hover:border-slate-700 transition-all shadow-sm"
                   >
                     <div>
-                      <div className="h-48 overflow-hidden relative bg-slate-900">
+                      <div className="h-48 overflow-hidden relative bg-slate-950">
                         <img
                           src={prod.image_url}
                           alt={prod.title}
@@ -660,7 +667,7 @@ export function AdminPage() {
                             {prod.price.toLocaleString('ru-RU')} ₽
                           </span>
                           {prod.size && (
-                            <span className="bg-slate-700/80 px-2 py-0.5 rounded text-[11px] text-slate-300">
+                            <span className="bg-slate-800 px-2 py-0.5 rounded text-[11px] text-slate-300">
                               {prod.size}
                             </span>
                           )}
@@ -668,10 +675,10 @@ export function AdminPage() {
                       </div>
                     </div>
 
-                    <div className="p-4 pt-0 flex items-center justify-end gap-2 border-t border-slate-700/50 mt-2">
+                    <div className="p-4 pt-0 flex items-center justify-end gap-2 border-t border-slate-800 mt-2">
                       <button
                         onClick={() => handleOpenProductModal(prod)}
-                        className="p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-700/50 rounded-lg transition-colors"
+                        className="p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-800 rounded-lg transition-colors"
                         title="Редактировать"
                       >
                         <Edit className="w-4 h-4" />
@@ -682,7 +689,7 @@ export function AdminPage() {
                             deleteProduct(prod.id)
                           }
                         }}
-                        className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-700/50 rounded-lg transition-colors"
+                        className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors"
                         title="Удалить"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -697,7 +704,7 @@ export function AdminPage() {
 
         {/* TAB 4: TELEGRAM CONFIGURATION */}
         {activeTab === 'telegram' && (
-          <form onSubmit={handleSaveShopTheme} className="bg-slate-800 p-6 rounded-3xl border border-slate-700 space-y-6 max-w-2xl">
+          <form onSubmit={handleSaveShopTheme} className="bg-slate-900 p-6 rounded-3xl border border-slate-800 space-y-6 max-w-2xl">
             <div>
               <h2 className="text-xl font-bold text-white">Прием заказов в Telegram</h2>
               <p className="text-xs text-slate-400">Укажите ваш Telegram юзернейм для моментального приёма заявок</p>
@@ -709,7 +716,7 @@ export function AdminPage() {
                 <span>Ваш Юзернейм в Telegram для приема заказов:</span>
               </label>
               <div className="flex items-center">
-                <span className="text-xs text-slate-400 bg-slate-900 px-3 py-2.5 rounded-l-xl border border-r-0 border-slate-700 font-mono">
+                <span className="text-xs text-slate-400 bg-slate-950 px-3 py-2.5 rounded-l-xl border border-r-0 border-slate-700 font-mono">
                   @
                 </span>
                 <input
@@ -717,7 +724,7 @@ export function AdminPage() {
                   required
                   value={themeForm.telegram || ''}
                   onChange={(e) => setThemeForm({ ...themeForm, telegram: e.target.value })}
-                  className="bg-slate-900 border border-slate-700 text-xs text-white rounded-r-xl px-3 py-2.5 flex-1 font-semibold"
+                  className="bg-slate-950 border border-slate-700 text-xs text-white rounded-r-xl px-3 py-2.5 flex-1 font-semibold"
                   placeholder="reseller_admin"
                 />
               </div>
@@ -735,47 +742,127 @@ export function AdminPage() {
 
       </div>
 
-      {/* EDIT BLOCK CONTENT MODAL */}
-      {editingBlock && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-800 border border-slate-700 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl relative">
+      {/* ADD BLOCK LIBRARY MODAL */}
+      {showAddBlockModal && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 space-y-6 shadow-2xl relative animate-in fade-in zoom-in duration-200">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white font-display">Редактировать блок</h3>
+              <h3 className="text-lg font-bold text-white font-display">Библиотека Блоков</h3>
+              <button onClick={() => setShowAddBlockModal(false)} className="p-1 text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+              {BLOCK_LIBRARY.map((item) => (
+                <div
+                  key={item.type}
+                  onClick={() => handleAddBlockFromLibrary(item)}
+                  className="bg-slate-800/80 hover:bg-slate-800 p-4 rounded-2xl border border-slate-700 hover:border-blue-500 cursor-pointer transition-all flex items-center justify-between group"
+                >
+                  <div>
+                    <h4 className="font-bold text-sm text-white group-hover:text-blue-400 transition-colors">
+                      {item.name}
+                    </h4>
+                    <p className="text-xs text-slate-400 mt-0.5">{item.desc}</p>
+                  </div>
+                  <Plus className="w-5 h-5 text-slate-400 group-hover:text-blue-400" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* BLOCK PROPS EDIT MODAL */}
+      {editingBlock && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl relative">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white font-display">
+                Настройка стиля блока [{editingBlock.type}]
+              </h3>
               <button onClick={() => setEditingBlock(null)} className="p-1 text-slate-400 hover:text-white">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveBlock} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Заголовок блока</label>
-                <input
-                  type="text"
-                  value={blockForm.title}
-                  onChange={(e) => setBlockForm({ ...blockForm, title: e.target.value })}
-                  className="bg-slate-900 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Подзаголовок / Описание</label>
-                <input
-                  type="text"
-                  value={blockForm.subtitle}
-                  onChange={(e) => setBlockForm({ ...blockForm, subtitle: e.target.value })}
-                  className="bg-slate-900 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
-                />
-              </div>
-
-              {editingBlock.type === 'promo' && (
+            <form onSubmit={handleSaveBlockProps} className="space-y-4">
+              {/* Title Input */}
+              {editingBlock.title !== undefined && (
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">URL картинки баннера</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Заголовок блока</label>
+                  <input
+                    type="text"
+                    value={blockPropsForm.title || ''}
+                    onChange={(e) => setBlockPropsForm({ ...blockPropsForm, title: e.target.value })}
+                    className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                  />
+                </div>
+              )}
+
+              {/* Subtitle Input */}
+              {editingBlock.subtitle !== undefined && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Подзаголовок / Описание</label>
+                  <input
+                    type="text"
+                    value={blockPropsForm.subtitle || ''}
+                    onChange={(e) => setBlockPropsForm({ ...blockPropsForm, subtitle: e.target.value })}
+                    className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                  />
+                </div>
+              )}
+
+              {/* Image URL Input */}
+              {editingBlock.imageUrl !== undefined && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">URL Изображения</label>
                   <input
                     type="url"
-                    value={blockForm.imageUrl}
-                    onChange={(e) => setBlockForm({ ...blockForm, imageUrl: e.target.value })}
-                    className="bg-slate-900 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                    value={blockPropsForm.imageUrl || ''}
+                    onChange={(e) => setBlockPropsForm({ ...blockPropsForm, imageUrl: e.target.value })}
+                    className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
                   />
+                </div>
+              )}
+
+              {/* Columns Count for Products Grid */}
+              {editingBlock.type === 'products' && (
+                <div className="space-y-3 pt-2">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">Количество колонок в сетке</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[2, 3, 4].map((num) => (
+                        <button
+                          key={num}
+                          type="button"
+                          onClick={() => setBlockPropsForm({ ...blockPropsForm, columns: num })}
+                          className={`py-2 text-xs font-bold rounded-xl border transition-all ${
+                            (blockPropsForm.columns || 3) === num
+                              ? 'bg-blue-600 text-white border-blue-500'
+                              : 'bg-slate-950 text-slate-400 border-slate-800'
+                          }`}
+                        >
+                          {num} Колонки
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">Стиль карточек товаров</label>
+                    <select
+                      value={blockPropsForm.cardStyle || 'modern'}
+                      onChange={(e) => setBlockPropsForm({ ...blockPropsForm, cardStyle: e.target.value })}
+                      className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                    >
+                      <option value="modern">Современный с тенью (Modern)</option>
+                      <option value="minimal">Минималистичный (Minimal)</option>
+                      <option value="glass">Стеклянный с размытием (Glassmorphism)</option>
+                      <option value="border">Строгая рамка (Border / High Fashion)</option>
+                    </select>
+                  </div>
                 </div>
               )}
 
@@ -783,7 +870,7 @@ export function AdminPage() {
                 <button
                   type="button"
                   onClick={() => setEditingBlock(null)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 rounded-xl"
+                  className="px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800 rounded-xl"
                 >
                   Отмена
                 </button>
@@ -799,10 +886,10 @@ export function AdminPage() {
         </div>
       )}
 
-      {/* PRODUCT MODAL WITH BRAND & CATEGORY */}
+      {/* PRODUCT MODAL */}
       {showProductModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-800 border border-slate-700 rounded-3xl max-w-lg w-full p-6 space-y-6 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 space-y-6 shadow-2xl relative">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-white font-display">
                 {editingProduct ? 'Редактировать товар' : 'Добавить новый товар'}
@@ -820,7 +907,7 @@ export function AdminPage() {
                   required
                   value={prodForm.title}
                   onChange={(e) => setProdForm({ ...prodForm, title: e.target.value })}
-                  className="bg-slate-900 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                  className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
                   placeholder="Например: Supreme Box Logo Hoodie"
                 />
               </div>
@@ -831,7 +918,7 @@ export function AdminPage() {
                   <select
                     value={prodForm.category}
                     onChange={(e) => setProdForm({ ...prodForm, category: e.target.value })}
-                    className="bg-slate-900 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                    className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
                   >
                     <option value="Одежда">Одежда</option>
                     <option value="Обувь">Обувь</option>
@@ -847,7 +934,7 @@ export function AdminPage() {
                     type="text"
                     value={prodForm.brand}
                     onChange={(e) => setProdForm({ ...prodForm, brand: e.target.value })}
-                    className="bg-slate-900 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                    className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
                     placeholder="Nike, Supreme..."
                   />
                 </div>
@@ -861,7 +948,7 @@ export function AdminPage() {
                     required
                     value={prodForm.price}
                     onChange={(e) => setProdForm({ ...prodForm, price: e.target.value })}
-                    className="bg-slate-900 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                    className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
                     placeholder="4900"
                   />
                 </div>
@@ -872,7 +959,7 @@ export function AdminPage() {
                     type="text"
                     value={prodForm.size}
                     onChange={(e) => setProdForm({ ...prodForm, size: e.target.value })}
-                    className="bg-slate-900 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                    className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
                     placeholder="S, M, L, XL"
                   />
                 </div>
@@ -885,7 +972,7 @@ export function AdminPage() {
                   required
                   value={prodForm.image_url}
                   onChange={(e) => setProdForm({ ...prodForm, image_url: e.target.value })}
-                  className="bg-slate-900 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                  className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
                   placeholder="https://images.unsplash.com/..."
                 />
               </div>
@@ -896,7 +983,7 @@ export function AdminPage() {
                   id="avail"
                   checked={prodForm.is_available}
                   onChange={(e) => setProdForm({ ...prodForm, is_available: e.target.checked })}
-                  className="w-4 h-4 rounded text-blue-600 bg-slate-900 border-slate-700"
+                  className="w-4 h-4 rounded text-blue-600 bg-slate-950 border-slate-700"
                 />
                 <label htmlFor="avail" className="text-xs font-medium text-slate-300">
                   Товар в наличии в магазине
@@ -907,7 +994,7 @@ export function AdminPage() {
                 <button
                   type="button"
                   onClick={() => setShowProductModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 rounded-xl"
+                  className="px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800 rounded-xl"
                 >
                   Отмена
                 </button>
@@ -923,10 +1010,10 @@ export function AdminPage() {
         </div>
       )}
 
-      {/* INSTANT SHOP CREATION MODAL */}
+      {/* CREATE SHOP MODAL */}
       {showShopModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-800 border border-slate-700 rounded-3xl max-w-md w-full p-6 space-y-6 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 space-y-6 shadow-2xl relative">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-white font-display">Создать витрину за 1 минуту</h3>
               <button onClick={() => setShowShopModal(false)} className="p-1 text-slate-400 hover:text-white">
@@ -942,7 +1029,7 @@ export function AdminPage() {
                   required
                   value={shopForm.name}
                   onChange={(e) => setShopForm({ ...shopForm, name: e.target.value })}
-                  className="bg-slate-900 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                  className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
                   placeholder="Например: Streetwear Lab"
                 />
               </div>
@@ -958,7 +1045,7 @@ export function AdminPage() {
                     required
                     value={shopForm.slug}
                     onChange={(e) => setShopForm({ ...shopForm, slug: e.target.value })}
-                    className="bg-slate-900 border border-slate-700 text-xs text-white rounded-r-xl px-3 py-2.5 flex-1 font-mono"
+                    className="bg-slate-950 border border-slate-700 text-xs text-white rounded-r-xl px-3 py-2.5 flex-1 font-mono"
                     placeholder="streetwear-lab"
                   />
                 </div>
@@ -978,7 +1065,7 @@ export function AdminPage() {
                     required
                     value={shopForm.telegram}
                     onChange={(e) => setShopForm({ ...shopForm, telegram: e.target.value })}
-                    className="bg-slate-900 border border-slate-700 text-xs text-white rounded-r-xl px-3 py-2.5 flex-1 font-semibold"
+                    className="bg-slate-950 border border-slate-700 text-xs text-white rounded-r-xl px-3 py-2.5 flex-1 font-semibold"
                     placeholder="your_telegram_username"
                   />
                 </div>
@@ -988,7 +1075,7 @@ export function AdminPage() {
                 <button
                   type="button"
                   onClick={() => setShowShopModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 rounded-xl"
+                  className="px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800 rounded-xl"
                 >
                   Отмена
                 </button>

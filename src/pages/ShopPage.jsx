@@ -8,8 +8,7 @@ import {
   Share2,
   Tag,
   Layers,
-  Search,
-  ArrowRight
+  Search
 } from 'lucide-react'
 import { useStore } from '../store/useStore'
 
@@ -186,7 +185,7 @@ export function ShopPage() {
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 w-full flex-grow space-y-12">
         {activeBlocks.map((block) => {
           
-          // BLOCK TYPE 1: BANNER
+          // BLOCK 1: BANNER
           if (block.type === 'banner') {
             return (
               <div key={block.id} className="relative rounded-3xl overflow-hidden p-8 sm:p-12 border border-white/10 shadow-2xl bg-white/5">
@@ -201,7 +200,7 @@ export function ShopPage() {
             )
           }
 
-          // BLOCK TYPE 2: CATEGORIES & SEARCH
+          // BLOCK 2: CATEGORIES & SEARCH
           if (block.type === 'categories') {
             return (
               <div key={block.id} className="space-y-4">
@@ -267,10 +266,21 @@ export function ShopPage() {
             )
           }
 
-          // BLOCK TYPE 3: PRODUCTS GRID
+          // BLOCK 3: PRODUCTS GRID (Customizable Columns & Card Styles)
           if (block.type === 'products') {
+            const colsClass =
+              block.columns === 2
+                ? 'grid-cols-1 sm:grid-cols-2'
+                : block.columns === 4
+                ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-4'
+                : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+
             return (
-              <div key={block.id}>
+              <div key={block.id} className="space-y-4">
+                {block.title && (
+                  <h2 className="text-xl font-bold font-display">{block.title}</h2>
+                )}
+
                 {filteredProducts.length === 0 ? (
                   <div className="text-center py-20 opacity-60 bg-white/5 rounded-3xl border border-white/10">
                     <ShoppingBag className="w-12 h-12 mx-auto mb-3 opacity-40" />
@@ -287,13 +297,19 @@ export function ShopPage() {
                     </button>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className={`grid ${colsClass} gap-6`}>
                     {filteredProducts.map((product) => (
                       <div
                         key={product.id}
                         onClick={() => setSelectedProduct(product)}
-                        className="group rounded-3xl p-4 border border-white/10 shadow-xl hover:border-white/25 transition-all duration-300 cursor-pointer flex flex-col justify-between"
-                        style={{ backgroundColor: theme.cardBg || '#12141d' }}
+                        className={`group rounded-3xl p-4 border border-white/10 shadow-xl hover:border-white/25 transition-all duration-300 cursor-pointer flex flex-col justify-between ${
+                          block.cardStyle === 'glass'
+                            ? 'backdrop-blur-md bg-white/5'
+                            : block.cardStyle === 'border'
+                            ? 'bg-black border-2 border-white/20 rounded-none'
+                            : ''
+                        }`}
+                        style={{ backgroundColor: block.cardStyle === 'glass' ? undefined : (theme.cardBg || '#12141d') }}
                       >
                         <div>
                           <div className="h-60 sm:h-64 rounded-2xl overflow-hidden mb-4 relative bg-slate-900">
@@ -353,7 +369,7 @@ export function ShopPage() {
             )
           }
 
-          // BLOCK TYPE 4: PROMO IMAGE CARD
+          // BLOCK 4: PROMO CARD
           if (block.type === 'promo') {
             return (
               <div key={block.id} className="relative rounded-3xl overflow-hidden p-8 sm:p-12 border border-white/15 shadow-2xl bg-slate-900 group">
@@ -368,7 +384,17 @@ export function ShopPage() {
             )
           }
 
-          // BLOCK TYPE 5: CONTACT / TELEGRAM CTA
+          // BLOCK 5: TEXT NOTE
+          if (block.type === 'text_note') {
+            return (
+              <div key={block.id} className="rounded-3xl p-8 border border-white/10 bg-white/5 space-y-2">
+                {block.title && <h3 className="text-lg font-bold font-display">{block.title}</h3>}
+                {block.text && <p className="text-xs sm:text-sm opacity-80 italic leading-relaxed">{block.text}</p>}
+              </div>
+            )
+          }
+
+          // BLOCK 6: TELEGRAM CTA
           if (block.type === 'contact') {
             return (
               <div key={block.id} className="rounded-3xl p-8 border border-white/15 bg-white/5 backdrop-blur-md text-center space-y-4">
