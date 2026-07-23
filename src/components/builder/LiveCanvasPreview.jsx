@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Monitor,
   Tablet,
@@ -37,25 +37,25 @@ export function LiveCanvasPreview({
   const colors = themeConfig.colors || tokens.colors
   const typography = themeConfig.typography || tokens.typography
   const currencySymbol = themeConfig.currencySymbol || '₽'
-  const telegram = themeConfig.telegram || 'admin'
+  const telegram = themeConfig.telegram || 'reseller_admin'
 
   const deviceWidthClass =
     deviceView === 'mobile'
-      ? 'w-[375px]'
+      ? 'w-[385px] py-8'
       : deviceView === 'tablet'
-      ? 'w-[768px]'
-      : 'w-full max-w-[1300px]'
+      ? 'w-[780px] py-8'
+      : 'w-full max-w-[1350px] py-4'
 
   return (
-    <div className="flex-1 bg-[#090a0f] flex flex-col h-full overflow-hidden select-none relative">
+    <div className="flex-1 bg-[#090a0f] flex flex-col h-full overflow-hidden relative">
       
-      {/* Device Switcher Header */}
+      {/* DEVICE SWITCHER TOP BAR */}
       <div className="h-14 bg-[#0d0f17] border-b border-slate-800/80 px-6 flex items-center justify-between z-30 flex-shrink-0">
         <div className="flex items-center gap-1.5 bg-slate-900/90 p-1 rounded-2xl border border-slate-800">
           <button
             onClick={() => setDeviceView('desktop')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              deviceView === 'desktop' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
+              deviceView === 'desktop' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
             }`}
           >
             <Monitor className="w-4 h-4" />
@@ -65,7 +65,7 @@ export function LiveCanvasPreview({
           <button
             onClick={() => setDeviceView('tablet')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              deviceView === 'tablet' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
+              deviceView === 'tablet' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
             }`}
           >
             <Tablet className="w-4 h-4" />
@@ -75,7 +75,7 @@ export function LiveCanvasPreview({
           <button
             onClick={() => setDeviceView('mobile')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              deviceView === 'mobile' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
+              deviceView === 'mobile' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
             }`}
           >
             <Smartphone className="w-4 h-4" />
@@ -85,14 +85,17 @@ export function LiveCanvasPreview({
 
         <div className="text-xs font-mono font-bold text-slate-400 flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>АКТИВНЫЙ ШАБЛОН: {tokens.name.toUpperCase()}</span>
+          <span>LIVE BROWSER PREVIEW • {tokens.name.toUpperCase()}</span>
         </div>
       </div>
 
-      {/* Canvas Viewport Scroll Area */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-8 flex justify-center bg-[#090a0f]">
+      {/* FULL UNRESTRICTED NATURAL BROWSER SCROLL AREA */}
+      <div
+        tabIndex={0}
+        className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-8 flex justify-center bg-[#090a0f] focus:outline-none scroll-smooth"
+      >
         <div
-          className={`${deviceWidthClass} transition-all duration-300 min-h-screen shadow-2xl flex flex-col relative border border-slate-800 rounded-3xl overflow-hidden`}
+          className={`${deviceWidthClass} transition-all duration-300 min-h-full h-auto shadow-2xl flex flex-col relative border border-slate-800 rounded-3xl`}
           style={{
             backgroundColor: colors.background || '#ffffff',
             color: colors.text || '#000000',
@@ -100,8 +103,8 @@ export function LiveCanvasPreview({
           }}
         >
 
-          {/* RENDER THEME BLOCKS USING DEDICATED THEME COMPONENTS */}
-          <main className="flex-1 p-6 space-y-8">
+          {/* RENDER THEME BLOCKS WITH NATURAL DOCUMENT HEIGHT */}
+          <main className="flex-1 p-6 space-y-12 h-auto">
             {blocks.filter((b) => !b.hidden).map((block, idx) => {
               const isSelected = selectedBlockId === block.id
 
@@ -120,7 +123,7 @@ export function LiveCanvasPreview({
                 >
                   {/* Floating Action Bar */}
                   {isSelected && (
-                    <div className="absolute -top-4 right-4 z-40 bg-blue-600 text-white px-3 py-1.5 rounded-full shadow-xl flex items-center gap-2 text-xs font-extrabold animate-in fade-in zoom-in duration-150">
+                    <div className="absolute -top-4 right-4 z-40 bg-blue-600 text-white px-3.5 py-1.5 rounded-full shadow-xl flex items-center gap-2 text-xs font-extrabold animate-in fade-in zoom-in duration-150">
                       <span>Секция: {block.type}</span>
                       <button
                         onClick={(e) => {
@@ -146,7 +149,7 @@ export function LiveCanvasPreview({
                     </div>
                   )}
 
-                  {/* DEDICATED THEME COMPONENT RENDERERS */}
+                  {/* DEDICATED THEME RENDERERS */}
                   {block.type === 'hero' && (
                     <HeroComponent props={block.props} onInlineTextChange={onInlineTextChange} blockId={block.id} />
                   )}
@@ -163,11 +166,11 @@ export function LiveCanvasPreview({
             })}
           </main>
 
-          {/* Bottom Insertion Button */}
-          <div className="p-8 text-center bg-slate-900/10 border-t border-slate-200">
+          {/* Bottom Canvas "+ Добавить секцию" Button */}
+          <div className="p-12 text-center bg-slate-900/10 border-t border-slate-200">
             <button
               onClick={onOpenLibrary}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-black text-white font-black text-xs uppercase tracking-wider rounded-full shadow-xl"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-black text-white font-black text-xs uppercase tracking-wider rounded-full shadow-xl hover:scale-105 transition-transform"
             >
               <Plus className="w-4 h-4" />
               <span>+ Добавить секцию</span>
