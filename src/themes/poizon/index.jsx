@@ -3,9 +3,9 @@ import { ShieldCheck, Search, ShoppingBag, Send, Tag, Flame, Heart, ChevronDown,
 
 export const poizonTokens = {
   id: 'poizon',
-  name: 'POIZON STREET MARKETPLACE',
-  subtitle: 'Dense Cyber Sneaker Marketplace',
-  desc: 'Тёмный маркетплейс кроссовок: моментальный поиск на первом экране, плотная сетка 4 колонок, скидки и бейджи 100% Legit Check',
+  name: 'STREET MARKETPLACE SHOPIFY THEME',
+  subtitle: 'Poizon & StockX Cyber Marketplace',
+  desc: 'Плотный маркетплейс кроссовок: мгновенный поиск на первом экране, 4 колонки товаров, скидки, размеры и 100% Legit Check',
   colors: {
     primary: '#00f0ff',
     background: '#080a10',
@@ -22,14 +22,14 @@ export const poizonTokens = {
   styles: {
     borderRadius: '16px',
     shadow: 'glow',
-    containerWidth: '1300px'
+    containerWidth: '1350px'
   }
 }
 
 export function PoizonHero({ props }) {
-  // Minimal compact tech banner
+  // Minimal compact tech status bar
   return (
-    <div className="bg-[#111624] border border-[#1b2336] rounded-2xl py-3 px-6 text-center text-xs font-bold text-[#00f0ff] uppercase flex items-center justify-between">
+    <div className="bg-[#111624] border border-[#1b2336] rounded-2xl py-2.5 px-6 text-center text-xs font-bold text-[#00f0ff] uppercase flex items-center justify-between">
       <div className="flex items-center gap-2">
         <ShieldCheck className="w-4 h-4 text-[#00f0ff]" />
         <span>POIZON 100% VERIFIED LEGIT CHECK MARKETPLACE</span>
@@ -74,7 +74,7 @@ export function PoizonCatalog({ products, currencySymbol, telegram }) {
     const orderMessage = `Привет! Хочу заказать ${product.title}\n` +
       `• Цена: ${product.price.toLocaleString('ru-RU')} ${currencySymbol}\n` +
       (product.brand ? `• Бренд: ${product.brand}\n` : '') +
-      `• Каталог: Poizon Street`
+      `• Каталог: Street Marketplace`
     window.open(`https://t.me/${rawTg.replace('@', '')}?text=${encodeURIComponent(orderMessage)}`, '_blank')
   }
 
@@ -89,7 +89,7 @@ export function PoizonCatalog({ products, currencySymbol, telegram }) {
           <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            placeholder="Поиск по модели, бренду или артикулу (например Nike Jordan)..."
+            placeholder="Поиск по 300+ позициям кроссовок и одежды..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-[#080a10] border border-[#1b2336] rounded-2xl pl-12 pr-4 py-3.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-[#00f0ff] font-bold"
@@ -118,7 +118,7 @@ export function PoizonCatalog({ products, currencySymbol, telegram }) {
           <select
             value={selectedBrand}
             onChange={(e) => setSelectedBrand(e.target.value)}
-            className="bg-[#080a10] border border-[#1b2336] text-xs text-white rounded-xl px-4 py-2.5 font-bold focus:outline-none"
+            className="bg-[#080a10] border border-[#1b2336] text-xs text-white rounded-xl px-4 py-2.5 font-bold focus:outline-none cursor-pointer"
           >
             {brands.map((b) => (
               <option key={b} value={b}>{b}</option>
@@ -128,7 +128,7 @@ export function PoizonCatalog({ products, currencySymbol, telegram }) {
           <select
             value={selectedSize}
             onChange={(e) => setSelectedSize(e.target.value)}
-            className="bg-[#080a10] border border-[#1b2336] text-xs text-white rounded-xl px-4 py-2.5 font-bold focus:outline-none"
+            className="bg-[#080a10] border border-[#1b2336] text-xs text-white rounded-xl px-4 py-2.5 font-bold focus:outline-none cursor-pointer"
           >
             {sizes.map((s) => (
               <option key={s} value={s}>{s === 'ВСЕ' ? 'ВСЕ РАЗМЕРЫ' : `РАЗМЕР: ${s}`}</option>
@@ -271,7 +271,6 @@ export function PoizonFooter({ telegram }) {
         <ShieldCheck className="w-4 h-4" />
         <span>POIZON FAST TELEGRAM MARKETPLACE GATEWAY</span>
       </div>
-      <p className="text-xs text-slate-400 max-w-sm mx-auto">Прямой приём заказов менеджером с подбором нужного размера</p>
       <a
         href={`https://t.me/${(telegram || 'admin').replace('@', '')}`}
         target="_blank"
