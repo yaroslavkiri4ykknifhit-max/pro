@@ -11,33 +11,33 @@ export const BLOCK_LIBRARY = [
       subtitle: 'Эксклюзивные брендовые товары с доставкой',
       imageUrl: 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=1200&q=80',
       buttonText: 'Смотреть каталог',
-      height: 'medium', // 'small' | 'medium' | 'large'
-      textAlignment: 'center', // 'left' | 'center'
+      height: 'medium',
+      textAlignment: 'center',
       overlayOpacity: 50
     }
   },
   {
     type: 'categories',
-    name: '🏷️ Блок Фильтров и Поиска',
-    desc: 'Чипсы категорий, фильтр брендов и поисковая строка',
+    name: '🏷️ Блок Фильтров и Поиска (Underbuy Style)',
+    desc: 'Рамочные прямоугольные выпадающие меню категорий и брендов',
     defaultProps: {
       showSearch: true,
       showCategories: true,
       showBrands: true,
-      chipStyle: 'pill' // 'pill' | 'rounded' | 'sharp'
+      filterStyle: 'underbuy_dropdowns' // 'underbuy_dropdowns' | 'pill' | 'rounded'
     }
   },
   {
     type: 'products',
-    name: '📦 Каталог и Сетка Товаров',
-    desc: 'Основной каталог товаров с гибкой настройкой колонок и карточек',
+    name: '📦 Сетка Каталога (Underbuy Design)',
+    desc: 'Минималистичная сетка товаров с сердечками и заглавной типографикой',
     defaultProps: {
-      title: 'Все товары',
-      columns: 3, // 2 | 3 | 4
-      cardStyle: 'modern', // 'modern' | 'minimal' | 'glass' | 'border'
-      borderRadius: '2xl', // 'none' | 'xl' | '2xl' | '3xl' | 'full'
+      title: '',
+      columns: 2,
+      cardStyle: 'underbuy', // 'underbuy' | 'modern' | 'minimal' | 'glass' | 'border'
+      showHeartIcon: true,
       showBrandBadge: true,
-      showPriceButton: true
+      showCategoryTag: true
     }
   },
   {
@@ -45,7 +45,7 @@ export const BLOCK_LIBRARY = [
     name: '📸 Промо-Карточка / Спецпредложение',
     desc: 'Широкая акционная карточка с картинкой и кнопкой',
     defaultProps: {
-      title: '🔥 Скидка 10% при заказе от 2-х вещей',
+      title: '🔥 Скидка при заказе от 2-х позиций',
       subtitle: 'Успейте оформить заказ через менеджер в Telegram',
       imageUrl: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1000&q=80',
       buttonText: 'Выбрать в каталоге'
@@ -57,14 +57,14 @@ export const BLOCK_LIBRARY = [
     desc: 'Заметка, описание условий доставки или цитата продавца',
     defaultProps: {
       title: 'О нашей витрине',
-      text: 'Мы поставляем только 100% оригинальную продукцию напрямую от проверенных дистрибьюторов. Все вещи проходят строгую проверку подлинности перед отправкой.',
-      fontStyle: 'normal' // 'normal' | 'italic' | 'handwriting'
+      text: 'Мы поставляем только 100% оригинальную продукцию напрямую от проверенных дистрибьюторов.',
+      fontStyle: 'normal'
     }
   },
   {
     type: 'contact',
     name: '💬 Блок Заказа в Telegram',
-    desc: 'Большая призывающая кнопка связи с Telegram-продавцом',
+    desc: 'Призывающая кнопка связи с Telegram-продавцом',
     defaultProps: {
       title: 'Остались вопросы по размеру или наличию?',
       subtitle: 'Напишите продавцу прямо в Telegram — ответим за 2 минуты!',
@@ -75,80 +75,85 @@ export const BLOCK_LIBRARY = [
 
 export const LAYOUT_PRESETS = [
   {
+    id: 'underbuy_minimal',
+    name: '🖤 Underbuy Minimalist (Resell Fashion)',
+    desc: 'Строгий минимализм с рамочными выпадающими фильтрами, иконками сердечек и крупными ценами',
+    previewImage: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80',
+    config: {
+      primaryColor: '#000000',
+      backgroundColor: '#ffffff',
+      textColor: '#000000',
+      cardBg: '#ffffff',
+      font: 'Inter',
+      logoText: 'under buy',
+      logoUrl: '',
+      currencySymbol: '₽',
+      telegram: 'underbuy_admin'
+    },
+    blocks: [
+      { id: 'b-1', type: 'categories', filterStyle: 'underbuy_dropdowns', showSearch: true, showCategories: true, showBrands: true },
+      { id: 'b-2', type: 'products', title: '', columns: 2, cardStyle: 'underbuy', showHeartIcon: true, showBrandBadge: true, showCategoryTag: true },
+      { id: 'b-3', type: 'contact', title: 'Оформить заказ в Telegram', subtitle: 'Напишите менеджеру для проверки наличия и размера' }
+    ],
+    sampleProducts: [
+      { id: 'prod-ub-1', title: 'ENFANTS RICHES DEPRIMES RECORDS TOTE BAG', price: 6500, oldPrice: 8900, size: 'One Size', category: 'СУМКИ', brand: 'ENFANTS RICHES DEPRIMES', image_url: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80', is_available: true },
+      { id: 'prod-ub-2', title: 'Y-3 LOGO SHOULDER BAG', price: 12500, oldPrice: 15000, size: 'One Size', category: 'СУМКИ', brand: 'Y-3', image_url: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80', is_available: true },
+      { id: 'prod-ub-3', title: 'BALENCIAGA TRIPLE S BLACK EDITION', price: 65000, oldPrice: 78000, size: '42, 43', category: 'ОБУВЬ', brand: 'BALENCIAGA', image_url: 'https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&w=800&q=80', is_available: true },
+      { id: 'prod-ub-4', title: 'SUPREME BOX LOGO HOODIE BLACK', price: 28500, oldPrice: 32000, size: 'L, XL', category: 'ОДЕЖДА', brand: 'SUPREME', image_url: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80', is_available: true }
+    ]
+  },
+  {
     id: 'streetwear',
     name: '🔥 Streetwear Cyber (Supreme / Off-White)',
     desc: 'Тёмный сплит-стиль, крупная сетка товаров (2 колонки), оранжевые акценты',
+    previewImage: 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=800&q=80',
     config: {
       primaryColor: '#ff2a00',
       backgroundColor: '#0d0d0d',
       textColor: '#ffffff',
       cardBg: '#181818',
       font: 'Inter',
-      borderRadius: '2xl'
+      logoText: 'STREET LAB',
+      logoUrl: '',
+      currencySymbol: '₽',
+      telegram: 'reseller_admin'
     },
     blocks: [
       { id: 'b-1', type: 'banner', title: 'SUPREME & OFF-WHITE DROP', subtitle: 'Оригинальный streetwear в наличии', imageUrl: 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=1200&q=80', height: 'medium', textAlignment: 'center', overlayOpacity: 50 },
-      { id: 'b-2', type: 'categories', showSearch: true, showCategories: true, showBrands: true, chipStyle: 'pill' },
-      { id: 'b-3', type: 'products', title: 'Релиз недели', columns: 2, cardStyle: 'modern', borderRadius: '2xl', showBrandBadge: true, showPriceButton: true },
-      { id: 'b-4', type: 'promo', title: '🔥 Спецпредложение на кроссовки', subtitle: 'Ограниченное количество размеров', imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1000&q=80', buttonText: 'Выбрать' },
-      { id: 'b-5', type: 'contact', title: 'Заказ напрямую в Telegram', subtitle: 'Менеджер ответит моментально' }
-    ]
-  },
-  {
-    id: 'minimalist',
-    name: '🖤 Luxury Minimal (Balenciaga / Celine)',
-    desc: 'Строгий монохромный дизайн, острые углы, высокая плотность сетки (3 колонки)',
-    config: {
-      primaryColor: '#ffffff',
-      backgroundColor: '#000000',
-      textColor: '#ffffff',
-      cardBg: '#111111',
-      font: 'Inter',
-      borderRadius: 'none'
-    },
-    blocks: [
-      { id: 'b-1', type: 'banner', title: 'BALENCIAGA ARCHIVE', subtitle: 'Люксовая коллекция высокой моды', imageUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80', height: 'small', textAlignment: 'left', overlayOpacity: 40 },
-      { id: 'b-2', type: 'categories', showSearch: true, showCategories: true, showBrands: true, chipStyle: 'sharp' },
-      { id: 'b-3', type: 'products', title: 'Каталог', columns: 3, cardStyle: 'border', borderRadius: 'none', showBrandBadge: true, showPriceButton: true },
-      { id: 'b-4', type: 'contact', title: 'Клиентский сервис Balenciaga', subtitle: 'Консультация стилиста в Telegram' }
+      { id: 'b-2', type: 'categories', filterStyle: 'pill', showSearch: true, showCategories: true, showBrands: true },
+      { id: 'b-3', type: 'products', title: 'Релиз недели', columns: 2, cardStyle: 'modern', showHeartIcon: false },
+      { id: 'b-4', type: 'contact', title: 'Заказ напрямую в Telegram', subtitle: 'Менеджер ответит моментально' }
+    ],
+    sampleProducts: [
+      { id: 'prod-1', title: 'Oversized Acid-Wash Hoodie', price: 4900, size: 'S, M, L, XL', category: 'Одежда', brand: 'Supreme', image_url: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80', is_available: true },
+      { id: 'prod-2', title: 'Retro High-Top Sneakers', price: 12500, size: '41, 42, 43', category: 'Обувь', brand: 'Nike', image_url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80', is_available: true }
     ]
   },
   {
     id: 'apple_clean',
     name: '🍏 Apple Clean & Glass (Светлый Элегантный)',
     desc: 'Светлый минималистичный интерфейс, карточки с размытым фоном, 3 колонки',
+    previewImage: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&q=80',
     config: {
       primaryColor: '#0066ff',
       backgroundColor: '#f8fafc',
       textColor: '#0f172a',
       cardBg: '#ffffff',
       font: 'Plus Jakarta Sans',
-      borderRadius: '3xl'
+      logoText: 'creatiwise.',
+      logoUrl: '',
+      currencySymbol: '₽',
+      telegram: 'apple_reseller'
     },
     blocks: [
-      { id: 'b-1', type: 'banner', title: 'Оригинальные устройства и аксессуары', subtitle: 'Светлый чистый каталог премиум-уровня', imageUrl: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=80', height: 'medium', textAlignment: 'center', overlayOpacity: 30 },
-      { id: 'b-2', type: 'categories', showSearch: true, showCategories: true, showBrands: true, chipStyle: 'rounded' },
-      { id: 'b-3', type: 'products', title: 'Каталог устройств', columns: 3, cardStyle: 'glass', borderRadius: '3xl', showBrandBadge: true, showPriceButton: true },
+      { id: 'b-1', type: 'banner', title: 'Оригинальные устройства и аксессуары', subtitle: 'Светлый чистый каталог', imageUrl: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=80', height: 'medium', textAlignment: 'center', overlayOpacity: 30 },
+      { id: 'b-2', type: 'categories', filterStyle: 'pill', showSearch: true, showCategories: true, showBrands: true },
+      { id: 'b-3', type: 'products', title: 'Каталог устройств', columns: 3, cardStyle: 'glass', showHeartIcon: false },
       { id: 'b-4', type: 'contact', title: 'Задать вопрос в Telegram', subtitle: 'Быстрая консультация по моделям' }
-    ]
-  },
-  {
-    id: 'y2k_vintage',
-    name: '📼 Y2K & Vintage Retro (Stussy / Evisu)',
-    desc: 'Винтажные карточки, ретро-рамки, рукописные подписи',
-    config: {
-      primaryColor: '#e11d48',
-      backgroundColor: '#18181b',
-      textColor: '#f4f4f5',
-      cardBg: '#27272a',
-      font: 'Inter',
-      borderRadius: 'xl'
-    },
-    blocks: [
-      { id: 'b-1', type: 'banner', title: 'EVISU & STUSSY ARCHIVE 2000s', subtitle: 'Архивный деним и редкие вещи', imageUrl: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1200&q=80', height: 'medium', textAlignment: 'center', overlayOpacity: 60 },
-      { id: 'b-2', type: 'categories', showSearch: true, showCategories: true, showBrands: true, chipStyle: 'pill' },
-      { id: 'b-3', type: 'products', title: 'Архивный деним', columns: 2, cardStyle: 'modern', borderRadius: 'xl', showBrandBadge: true, showPriceButton: true },
-      { id: 'b-4', type: 'contact', title: 'Заказ редких позиций в Telegram', subtitle: 'Подбор размера менеджером' }
+    ],
+    sampleProducts: [
+      { id: 'prod-a1', title: 'Apple Watch Ultra 2', price: 79900, size: '49mm', category: 'Электроника', brand: 'Apple', image_url: 'https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=800&q=80', is_available: true },
+      { id: 'prod-a2', title: 'AirPods Max Silver', price: 54900, size: 'Standard', category: 'Электроника', brand: 'Apple', image_url: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80', is_available: true }
     ]
   }
 ]
@@ -157,30 +162,26 @@ const INITIAL_SHOPS = [
   {
     id: 'shop-1',
     user_id: 'user-demo',
-    name: 'Urban Streetwear Co.',
-    slug: 'urban-vibes',
-    description: 'Эксклюзивные дропы уличной одежды и лимитированных кроссовок.',
+    name: 'Underbuy Resell Store',
+    slug: 'under-buy',
+    description: 'Элитный ресейл брендовой одежды и аксессуаров.',
     blocks: LAYOUT_PRESETS[0].blocks,
     theme_config: LAYOUT_PRESETS[0].config
   },
   {
     id: 'shop-2',
     user_id: 'user-demo',
-    name: 'Luxe Minimal Apparel',
-    slug: 'luxe-store',
-    description: 'Премиальный минималистичный гардероб и качественные аксессуары.',
+    name: 'Urban Streetwear Co.',
+    slug: 'urban-vibes',
+    description: 'Эксклюзивные дропы уличной одежды и лимитированных кроссовок.',
     blocks: LAYOUT_PRESETS[1].blocks,
     theme_config: LAYOUT_PRESETS[1].config
   }
 ]
 
 const INITIAL_PRODUCTS = [
-  { id: 'prod-1', shop_id: 'shop-1', title: 'Oversized Acid-Wash Hoodie', price: 4900, size: 'S, M, L, XL', category: 'Одежда', brand: 'Supreme', image_url: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80', is_available: true },
-  { id: 'prod-2', shop_id: 'shop-1', title: 'Retro High-Top Sneakers (Edition 01)', price: 12500, size: '41, 42, 43, 44', category: 'Обувь', brand: 'Nike', image_url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80', is_available: true },
-  { id: 'prod-3', shop_id: 'shop-1', title: 'Minimalist Cargo Pants - Matte Black', price: 6800, size: 'M, L', category: 'Одежда', brand: 'Stone Island', image_url: 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=800&q=80', is_available: true },
-  { id: 'prod-4', shop_id: 'shop-1', title: 'Cyberpunk Graphics Heavy Tee', price: 3200, size: 'S, M, L', category: 'Одежда', brand: 'Palace', image_url: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80', is_available: true },
-  { id: 'prod-5', shop_id: 'shop-2', title: 'Balenciaga Triple S Black Edition', price: 65000, size: '39, 40, 41, 42, 43', category: 'Обувь', brand: 'Balenciaga', image_url: 'https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&w=800&q=80', is_available: true },
-  { id: 'prod-6', shop_id: 'shop-2', title: 'Celine Oversized Biker Leather Jacket', price: 195000, size: '48, 50', category: 'Одежда', brand: 'Celine', image_url: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=800&q=80', is_available: true }
+  ...LAYOUT_PRESETS[0].sampleProducts.map((p) => ({ ...p, shop_id: 'shop-1' })),
+  ...LAYOUT_PRESETS[1].sampleProducts.map((p) => ({ ...p, shop_id: 'shop-2' }))
 ]
 
 export const useStore = create((set, get) => ({
@@ -233,12 +234,21 @@ export const useStore = create((set, get) => ({
       blocks: defaultPreset.blocks,
       theme_config: {
         ...defaultPreset.config,
+        logoText: newShop.name,
         telegram: newShop.telegram || 'reseller_admin'
       }
     }
 
+    // Auto populate sample items matching preset
+    const newProducts = defaultPreset.sampleProducts.map((p, idx) => ({
+      ...p,
+      id: 'prod-' + Date.now() + '-' + idx,
+      shop_id: shopId
+    }))
+
     set((state) => ({
       shops: [shopWithId, ...state.shops],
+      products: [...newProducts, ...state.products],
       activeShopId: shopId
     }))
     get().persist()
@@ -252,12 +262,20 @@ export const useStore = create((set, get) => ({
     get().persist()
   },
 
-  // APPLY LAYOUT & UI CONCEPT PRESET
   applyPresetToShop: (shopId, presetId) => {
     const preset = LAYOUT_PRESETS.find((p) => p.id === presetId)
     if (!preset) return
 
+    const newBrandProducts = preset.sampleProducts.map((p, idx) => ({
+      ...p,
+      id: 'prod-' + Date.now() + '-' + idx,
+      shop_id: shopId
+    }))
+
+    const otherProducts = get().products.filter((p) => p.shop_id !== shopId)
+
     set((state) => ({
+      products: [...newBrandProducts, ...otherProducts],
       shops: state.shops.map((s) =>
         s.id === shopId
           ? {
@@ -278,13 +296,12 @@ export const useStore = create((set, get) => ({
     get().updateShop(shopId, { blocks })
   },
 
-  // Product CRUD
   addProduct: async (newProduct) => {
     const productWithId = {
       id: 'prod-' + Date.now(),
       is_available: true,
-      category: newProduct.category || 'Общее',
-      brand: newProduct.brand || 'Без бренда',
+      category: newProduct.category || 'ОБЩЕЕ',
+      brand: newProduct.brand || 'БЕЗ БРЕНДА',
       ...newProduct
     }
     set((state) => ({ products: [productWithId, ...state.products] }))

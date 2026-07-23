@@ -8,7 +8,9 @@ import {
   Share2,
   Tag,
   Layers,
-  Search
+  Search,
+  Heart,
+  ChevronDown
 } from 'lucide-react'
 import { useStore } from '../store/useStore'
 
@@ -21,41 +23,45 @@ export function ShopPage() {
   const shopProducts = products.filter((p) => p.shop_id === shop?.id)
 
   // Filter States
-  const [selectedCategory, setSelectedCategory] = useState('Все')
-  const [selectedBrand, setSelectedBrand] = useState('Все бренды')
+  const [selectedCategory, setSelectedCategory] = useState('ВСЕ')
+  const [selectedBrand, setSelectedBrand] = useState('ВСЕ БРЕНДЫ')
   const [searchQuery, setSearchQuery] = useState('')
+  const [favorites, setFavorites] = useState({})
 
   // Modal State
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [selectedSize, setSelectedSize] = useState('')
   const [copiedLink, setCopiedLink] = useState(false)
 
-  // Default theme fallback
+  // Theme config fallback
   const theme = shop?.theme_config || {
-    primaryColor: '#0066ff',
-    backgroundColor: '#090a0f',
-    textColor: '#ffffff',
-    cardBg: '#12141d',
+    primaryColor: '#000000',
+    backgroundColor: '#ffffff',
+    textColor: '#000000',
+    cardBg: '#ffffff',
     font: 'Inter',
-    bannerUrl: 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=1200&q=80',
+    logoText: 'under buy',
     logoUrl: '',
-    whatsapp: '',
-    telegram: 'reseller_admin'
+    currencySymbol: '₽',
+    telegram: 'underbuy_admin'
   }
 
-  // Calculate unique categories and brands
+  const currencySymbol = theme.currencySymbol || '₽'
+  const logoText = theme.logoText || shop?.name || 'under buy'
+
+  // Categories & Brands list
   const categories = useMemo(() => {
-    const cats = new Set(['Все'])
+    const cats = new Set(['ВСЕ'])
     shopProducts.forEach((p) => {
-      if (p.category) cats.add(p.category)
+      if (p.category) cats.add(p.category.toUpperCase())
     })
     return Array.from(cats)
   }, [shopProducts])
 
   const brands = useMemo(() => {
-    const bnd = new Set(['Все бренды'])
+    const bnd = new Set(['ВСЕ БРЕНДЫ'])
     shopProducts.forEach((p) => {
-      if (p.brand) bnd.add(p.brand)
+      if (p.brand) bnd.add(p.brand.toUpperCase())
     })
     return Array.from(bnd)
   }, [shopProducts])
@@ -63,12 +69,15 @@ export function ShopPage() {
   // Filtered products list
   const filteredProducts = useMemo(() => {
     return shopProducts.filter((p) => {
-      const matchCat = selectedCategory === 'Все' || p.category === selectedCategory
-      const matchBrand = selectedBrand === 'Все бренды' || p.brand === selectedBrand
+      const prodCat = (p.category || '').toUpperCase()
+      const prodBrand = (p.brand || '').toUpperCase()
+
+      const matchCat = selectedCategory === 'ВСЕ' || prodCat === selectedCategory
+      const matchBrand = selectedBrand === 'ВСЕ БРЕНДЫ' || prodBrand === selectedBrand
       const matchSearch =
         !searchQuery ||
         p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (p.brand && p.brand.toLowerCase().includes(searchQuery.toLowerCase()))
+        prodBrand.toLowerCase().includes(searchQuery.toLowerCase())
       return matchCat && matchBrand && matchSearch
     })
   }, [shopProducts, selectedCategory, selectedBrand, searchQuery])
@@ -80,15 +89,20 @@ export function ShopPage() {
     }
   }, [selectedProduct])
 
+  const toggleFavorite = (productId, e) => {
+    e.stopPropagation()
+    setFavorites((prev) => ({ ...prev, [productId]: !prev[productId] }))
+  }
+
   if (!shop) {
     return (
-      <div className="min-h-screen bg-[#090a0f] text-white flex flex-col items-center justify-center p-6 text-center">
-        <ShoppingBag className="w-16 h-16 text-slate-500 mb-4" />
+      <div className="min-h-screen bg-white text-black flex flex-col items-center justify-center p-6 text-center">
+        <ShoppingBag className="w-16 h-16 text-slate-400 mb-4" />
         <h1 className="text-2xl font-bold font-display mb-2">Магазин не найден</h1>
-        <p className="text-slate-400 text-sm mb-6 max-w-sm">
-          Страница магазина <code className="text-blue-400">/{shopSlug}</code> не существует.
+        <p className="text-slate-500 text-sm mb-6">
+          Витрина <code className="text-black font-bold">/{shopSlug}</code> не существует.
         </p>
-        <Link to="/" className="px-6 py-3 bg-blue-600 text-white rounded-full text-xs font-bold">
+        <Link to="/" className="px-6 py-3 bg-black text-white rounded-none text-xs font-bold uppercase">
           На главную
         </Link>
       </div>
@@ -98,11 +112,11 @@ export function ShopPage() {
   // DIRECT TELEGRAM ORDERING TO RESELLER USERNAME
   const handleTelegramOrder = () => {
     if (!selectedProduct) return
-    const rawTg = theme.telegram || 'reseller_admin'
+    const rawTg = theme.telegram || 'underbuy_admin'
     const cleanTgUsername = rawTg.replace('@', '').trim()
 
     const orderMessage = `Привет! Хочу заказать ${selectedProduct.title}\n` +
-      `• Цена: ${selectedProduct.price.toLocaleString('ru-RU')} ₽\n` +
+      `• Цена: ${selectedProduct.price.toLocaleString('ru-RU')} ${currencySymbol}\n` +
       `• Размер: ${selectedSize || 'Не указан'}\n` +
       (selectedProduct.brand ? `• Бренд: ${selectedProduct.brand}\n` : '') +
       `• Витрина: ${shop.name}`
@@ -112,13 +126,6 @@ export function ShopPage() {
     window.open(tgUrl, '_blank')
   }
 
-  const handleWhatsAppOrder = () => {
-    if (!selectedProduct) return
-    const cleanWa = (theme.whatsapp || '').replace(/[^0-9]/g, '')
-    const orderMessage = `Привет! Хочу заказать ${selectedProduct.title}, цена: ${selectedProduct.price} ₽, размер: ${selectedSize || 'Не указан'}`
-    window.open(`https://wa.me/${cleanWa}?text=${encodeURIComponent(orderMessage)}`, '_blank')
-  }
-
   const copyShareLink = () => {
     navigator.clipboard.writeText(window.location.href)
     setCopiedLink(true)
@@ -126,289 +133,269 @@ export function ShopPage() {
   }
 
   const activeBlocks = shop.blocks || [
-    { id: 'b-categories', type: 'categories' },
-    { id: 'b-products', type: 'products' }
+    { id: 'b-categories', type: 'categories', filterStyle: 'underbuy_dropdowns' },
+    { id: 'b-products', type: 'products', columns: 2, cardStyle: 'underbuy' }
   ]
 
   return (
     <div
-      className="min-h-screen font-sans transition-colors duration-300 flex flex-col selection:bg-blue-600 selection:text-white"
+      className="min-h-screen font-sans transition-colors duration-300 flex flex-col bg-white text-black selection:bg-black selection:text-white"
       style={{
-        backgroundColor: theme.backgroundColor || '#090a0f',
-        color: theme.textColor || '#ffffff'
+        backgroundColor: theme.backgroundColor || '#ffffff',
+        color: theme.textColor || '#000000'
       }}
     >
-      {/* Header Banner */}
-      <div className="w-full relative h-48 sm:h-64 md:h-80 overflow-hidden bg-slate-900">
-        {theme.bannerUrl && (
-          <img
-            src={theme.bannerUrl}
-            alt={shop.name}
-            className="w-full h-full object-cover"
-          />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
-
-        {/* Share Button */}
-        <div className="absolute top-4 right-4 max-w-5xl mx-auto z-10">
-          <button
-            onClick={copyShareLink}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-black/60 backdrop-blur-md text-white text-xs font-semibold hover:bg-black/80 transition-all border border-white/15 shadow-md"
-          >
-            <Share2 className="w-3.5 h-3.5" />
-            <span>{copiedLink ? 'Ссылка скопирована!' : 'Поделиться витриной'}</span>
-          </button>
-        </div>
-
-        {/* Shop Avatar & Info Overlay */}
-        <div className="absolute bottom-6 left-4 right-4 max-w-5xl mx-auto flex items-end gap-4">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border-4 border-white/20 overflow-hidden bg-blue-600 shadow-xl flex items-center justify-center text-2xl font-bold text-white flex-shrink-0">
+      {/* UNDERBUY STYLE HEADER */}
+      <header className="w-full bg-white border-b border-slate-200 py-6 px-4 sm:px-8 sticky top-0 z-40">
+        <div className="max-w-5xl mx-auto flex items-center justify-between">
+          
+          {/* Logo (Text or Image configurable in constructor) */}
+          <Link to={`/s/${shop.slug}`} className="flex items-center gap-2">
             {theme.logoUrl ? (
-              <img src={theme.logoUrl} alt={shop.name} className="w-full h-full object-cover" />
+              <img src={theme.logoUrl} alt={logoText} className="h-10 object-contain" />
             ) : (
-              shop.name[0]
+              <div className="flex flex-col leading-none font-display font-black text-3xl sm:text-4xl tracking-tighter text-black lowercase">
+                {logoText.includes(' ') ? (
+                  <>
+                    <span>{logoText.split(' ')[0]}</span>
+                    <span>{logoText.split(' ')[1]}</span>
+                  </>
+                ) : (
+                  <span>{logoText}</span>
+                )}
+              </div>
             )}
+          </Link>
+
+          {/* Right Action Icons (Wishlist & Search) */}
+          <div className="flex items-center gap-5">
+            <button
+              onClick={copyShareLink}
+              className="text-xs font-bold uppercase tracking-wider underline opacity-70 hover:opacity-100 hidden sm:inline"
+            >
+              {copiedLink ? 'Скопировано!' : 'Поделиться'}
+            </button>
+
+            <button className="p-1 hover:opacity-75 transition-opacity" title="Избранное">
+              <Heart className="w-6 h-6 stroke-[1.8] text-black" />
+            </button>
+
+            <button
+              onClick={() => {
+                const searchEl = document.getElementById('shop-search-input')
+                if (searchEl) searchEl.focus()
+              }}
+              className="p-1 hover:opacity-75 transition-opacity"
+              title="Поиск"
+            >
+              <Search className="w-6 h-6 stroke-[1.8] text-black" />
+            </button>
           </div>
 
-          <div className="space-y-1">
-            <h1 className="text-2xl sm:text-4xl font-black font-display tracking-tight text-white drop-shadow-md">
-              {shop.name}
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-300 max-w-xl line-clamp-2 drop-shadow">
-              {shop.description}
-            </p>
-          </div>
         </div>
-      </div>
+      </header>
 
       {/* Main Dynamic Blocks Container */}
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 w-full flex-grow space-y-12">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6 w-full flex-grow space-y-8">
         {activeBlocks.map((block) => {
-          
-          // BLOCK 1: BANNER
-          if (block.type === 'banner') {
-            return (
-              <div key={block.id} className="relative rounded-3xl overflow-hidden p-8 sm:p-12 border border-white/10 shadow-2xl bg-white/5">
-                {block.imageUrl && (
-                  <img src={block.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30" />
-                )}
-                <div className="relative z-10 max-w-xl space-y-3">
-                  <h2 className="text-2xl sm:text-4xl font-black font-display">{block.title}</h2>
-                  {block.subtitle && <p className="text-xs sm:text-sm opacity-80 leading-relaxed">{block.subtitle}</p>}
-                </div>
-              </div>
-            )
-          }
 
-          // BLOCK 2: CATEGORIES & SEARCH
+          // BLOCK 1: UNDERBUY RECTANGULAR DROPDOWN FILTERS
           if (block.type === 'categories') {
             return (
-              <div key={block.id} className="space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="relative flex-1 max-w-md">
-                    <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 opacity-50" />
-                    <input
-                      type="text"
-                      placeholder="Поиск по названию или бренду..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full bg-white/5 border border-white/15 rounded-2xl pl-10 pr-4 py-2.5 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-white/30 backdrop-blur-md"
-                    />
-                  </div>
-
-                  <div className="text-xs opacity-75 font-medium">
-                    Показано товаров: <span className="font-bold text-white">{filteredProducts.length}</span> из {shopProducts.length}
-                  </div>
+              <div key={block.id} className="space-y-4 pt-2">
+                
+                {/* Search Bar */}
+                <div className="relative">
+                  <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 opacity-40 text-black" />
+                  <input
+                    id="shop-search-input"
+                    type="text"
+                    placeholder="Поиск по наименованию или бренду..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-white border-2 border-black rounded-none pl-11 pr-4 py-3 text-xs font-bold text-black uppercase tracking-wider placeholder:text-slate-400 focus:outline-none focus:bg-slate-50 transition-colors"
+                  />
                 </div>
 
-                <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-                  <span className="text-xs font-bold opacity-60 flex items-center gap-1 mr-1">
-                    <Layers className="w-3.5 h-3.5" />
-                    Категории:
-                  </span>
-                  {categories.map((cat) => (
-                    <button
-                      key={cat}
-                      onClick={() => setSelectedCategory(cat)}
-                      className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                        selectedCategory === cat
-                          ? 'bg-white text-black shadow-md font-bold'
-                          : 'bg-white/5 hover:bg-white/10 text-white/80 border border-white/10'
-                      }`}
+                {/* Side-by-side Outlined Dropdowns (Underbuy screenshot style) */}
+                <div className="grid grid-cols-2 gap-3 sm:gap-6">
+                  
+                  {/* Category Dropdown */}
+                  <div className="relative">
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      className="w-full appearance-none bg-white border-2 border-black rounded-none px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-black cursor-pointer pr-10 focus:outline-none"
                     >
-                      {cat}
-                    </button>
-                  ))}
+                      {categories.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-black stroke-[2.5]" />
+                  </div>
+
+                  {/* Brand Dropdown */}
+                  <div className="relative">
+                    <select
+                      value={selectedBrand}
+                      onChange={(e) => setSelectedBrand(e.target.value)}
+                      className="w-full appearance-none bg-white border-2 border-black rounded-none px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-black cursor-pointer pr-10 focus:outline-none"
+                    >
+                      {brands.map((br) => (
+                        <option key={br} value={br}>
+                          {br}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-black stroke-[2.5]" />
+                  </div>
+
                 </div>
 
-                {brands.length > 1 && (
-                  <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-                    <span className="text-xs font-bold opacity-60 flex items-center gap-1 mr-1">
-                      <Tag className="w-3.5 h-3.5" />
-                      Бренды:
-                    </span>
-                    {brands.map((br) => (
-                      <button
-                        key={br}
-                        onClick={() => setSelectedBrand(br)}
-                        className={`px-3.5 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
-                          selectedBrand === br
-                            ? 'bg-blue-600 text-white font-bold shadow-md'
-                            : 'bg-white/5 hover:bg-white/10 text-white/70 border border-white/10'
-                        }`}
-                      >
-                        {br}
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
             )
           }
 
-          // BLOCK 3: PRODUCTS GRID (Customizable Columns & Card Styles)
+          // BLOCK 2: UNDERBUY PRODUCT CARD GRID (Pixel-perfect matching screenshot)
           if (block.type === 'products') {
             const colsClass =
-              block.columns === 2
-                ? 'grid-cols-1 sm:grid-cols-2'
-                : block.columns === 4
-                ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-4'
-                : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+              block.columns === 1
+                ? 'grid-cols-1'
+                : block.columns === 3
+                ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3'
+                : 'grid-cols-2' // Default 2 columns as in screenshot
 
             return (
-              <div key={block.id} className="space-y-4">
+              <div key={block.id} className="space-y-6 pt-2">
                 {block.title && (
-                  <h2 className="text-xl font-bold font-display">{block.title}</h2>
+                  <h2 className="text-xl font-black font-display uppercase tracking-tight">{block.title}</h2>
                 )}
 
                 {filteredProducts.length === 0 ? (
-                  <div className="text-center py-20 opacity-60 bg-white/5 rounded-3xl border border-white/10">
-                    <ShoppingBag className="w-12 h-12 mx-auto mb-3 opacity-40" />
-                    <h3 className="text-base font-semibold">Товары не найдены</h3>
+                  <div className="text-center py-20 bg-slate-50 border-2 border-black rounded-none">
+                    <ShoppingBag className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <h3 className="text-sm font-bold uppercase tracking-wider">Товары не найдены</h3>
                     <button
                       onClick={() => {
-                        setSelectedCategory('Все')
-                        setSelectedBrand('Все бренды')
+                        setSelectedCategory('ВСЕ')
+                        setSelectedBrand('ВСЕ БРЕНДЫ')
                         setSearchQuery('')
                       }}
-                      className="mt-4 px-4 py-2 text-xs font-bold bg-white/10 hover:bg-white/20 text-white rounded-full"
+                      className="mt-4 px-5 py-2.5 text-xs font-extrabold bg-black text-white uppercase tracking-wider"
                     >
                       Сбросить фильтры
                     </button>
                   </div>
                 ) : (
-                  <div className={`grid ${colsClass} gap-6`}>
-                    {filteredProducts.map((product) => (
-                      <div
-                        key={product.id}
-                        onClick={() => setSelectedProduct(product)}
-                        className={`group rounded-3xl p-4 border border-white/10 shadow-xl hover:border-white/25 transition-all duration-300 cursor-pointer flex flex-col justify-between ${
-                          block.cardStyle === 'glass'
-                            ? 'backdrop-blur-md bg-white/5'
-                            : block.cardStyle === 'border'
-                            ? 'bg-black border-2 border-white/20 rounded-none'
-                            : ''
-                        }`}
-                        style={{ backgroundColor: block.cardStyle === 'glass' ? undefined : (theme.cardBg || '#12141d') }}
-                      >
-                        <div>
-                          <div className="h-60 sm:h-64 rounded-2xl overflow-hidden mb-4 relative bg-slate-900">
-                            <img
-                              src={product.image_url}
-                              alt={product.title}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                            />
-                            <span
-                              className={`absolute top-3 right-3 text-[10px] font-bold px-2.5 py-1 rounded-full backdrop-blur-md ${
-                                product.is_available ? 'bg-emerald-500/90 text-white' : 'bg-red-500/90 text-white'
-                              }`}
-                            >
-                              {product.is_available ? 'В наличии' : 'Распродано'}
-                            </span>
+                  <div className={`grid ${colsClass} gap-x-4 gap-y-10 sm:gap-x-8 sm:gap-y-12`}>
+                    {filteredProducts.map((product) => {
+                      const isFav = favorites[product.id]
+                      return (
+                        <div
+                          key={product.id}
+                          onClick={() => setSelectedProduct(product)}
+                          className="group cursor-pointer flex flex-col justify-between space-y-3"
+                        >
+                          <div>
+                            {/* Product Photo with Heart Icon at Top-Right */}
+                            <div className="h-64 sm:h-80 w-full overflow-hidden relative bg-slate-50 border border-slate-100 flex items-center justify-center p-2 mb-3">
+                              <img
+                                src={product.image_url}
+                                alt={product.title}
+                                className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
+                              />
 
-                            {product.brand && (
-                              <span className="absolute bottom-3 left-3 text-[10px] font-bold px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md text-white border border-white/15">
-                                {product.brand}
-                              </span>
-                            )}
-                          </div>
-
-                          <div className="space-y-2">
-                            <div className="text-[10px] uppercase font-bold text-blue-400 tracking-wider">
-                              {product.category || 'Одежда'}
+                              {/* Heart Wishlist Icon */}
+                              <button
+                                onClick={(e) => toggleFavorite(product.id, e)}
+                                className="absolute top-3 right-3 p-1 hover:scale-110 transition-transform z-10"
+                              >
+                                <Heart
+                                  className={`w-5 h-5 stroke-[2] transition-colors ${
+                                    isFav ? 'fill-black text-black' : 'text-black stroke-black fill-none'
+                                  }`}
+                                />
+                              </button>
                             </div>
-                            <h3 className="font-bold text-base leading-snug line-clamp-2">
-                              {product.title}
-                            </h3>
-                            {product.size && (
-                              <div className="inline-flex items-center gap-1 text-[11px] opacity-75 bg-white/5 px-2.5 py-1 rounded-full border border-white/10">
-                                <Tag className="w-3 h-3" />
-                                <span>Размеры: {product.size}</span>
+
+                            {/* Product Details Typography matching Screenshot */}
+                            <div className="space-y-1">
+                              {/* Brand in Uppercase Gray */}
+                              {product.brand && (
+                                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-display">
+                                  {product.brand}
+                                </div>
+                              )}
+
+                              {/* Title in Bold Black */}
+                              <h3 className="font-extrabold text-xs sm:text-sm uppercase tracking-tight leading-snug text-black font-display line-clamp-2">
+                                {product.title}
+                              </h3>
+
+                              {/* Price Row (Large Bold Price + Old Price) */}
+                              <div className="flex items-baseline justify-between pt-1">
+                                <div className="flex items-baseline gap-2">
+                                  <span className="font-black text-lg sm:text-xl font-display text-black tracking-tight">
+                                    {product.price.toLocaleString('ru-RU')} {currencySymbol}
+                                  </span>
+                                  {product.oldPrice && (
+                                    <span className="line-through text-slate-400 text-xs font-semibold">
+                                      {product.oldPrice.toLocaleString('ru-RU')} {currencySymbol}
+                                    </span>
+                                  )}
+                                </div>
                               </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="pt-4 mt-4 border-t border-white/10 flex items-center justify-between">
-                          <div className="text-lg font-extrabold font-display" style={{ color: theme.primaryColor || '#0066ff' }}>
-                            {product.price.toLocaleString('ru-RU')} ₽
+                            </div>
                           </div>
 
-                          <button
-                            style={{ backgroundColor: theme.primaryColor || '#0066ff' }}
-                            className="px-4 py-2 text-xs font-bold text-white rounded-full shadow-md hover:opacity-90 transition-opacity"
-                          >
-                            Заказать
-                          </button>
+                          {/* Category Tag at Bottom */}
+                          {product.category && (
+                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pt-1 border-t border-slate-100 font-display">
+                              {product.category}
+                            </div>
+                          )}
+
                         </div>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 )}
               </div>
             )
           }
 
-          // BLOCK 4: PROMO CARD
-          if (block.type === 'promo') {
+          // BLOCK 3: BANNER
+          if (block.type === 'banner') {
             return (
-              <div key={block.id} className="relative rounded-3xl overflow-hidden p-8 sm:p-12 border border-white/15 shadow-2xl bg-slate-900 group">
+              <div key={block.id} className="relative border-2 border-black p-8 sm:p-12 text-center bg-black text-white space-y-3">
                 {block.imageUrl && (
-                  <img src={block.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-40" />
+                  <img src={block.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40" />
                 )}
-                <div className="relative z-10 max-w-lg space-y-4">
-                  <h3 className="text-2xl sm:text-3xl font-black font-display">{block.title}</h3>
-                  {block.subtitle && <p className="text-xs sm:text-sm text-slate-200">{block.subtitle}</p>}
+                <div className="relative z-10 space-y-2">
+                  <h2 className="text-2xl sm:text-4xl font-black font-display uppercase tracking-tight">{block.title}</h2>
+                  {block.subtitle && <p className="text-xs sm:text-sm opacity-80 uppercase tracking-wider">{block.subtitle}</p>}
                 </div>
               </div>
             )
           }
 
-          // BLOCK 5: TEXT NOTE
-          if (block.type === 'text_note') {
-            return (
-              <div key={block.id} className="rounded-3xl p-8 border border-white/10 bg-white/5 space-y-2">
-                {block.title && <h3 className="text-lg font-bold font-display">{block.title}</h3>}
-                {block.text && <p className="text-xs sm:text-sm opacity-80 italic leading-relaxed">{block.text}</p>}
-              </div>
-            )
-          }
-
-          // BLOCK 6: TELEGRAM CTA
+          // BLOCK 4: CONTACT / TELEGRAM CTA
           if (block.type === 'contact') {
             return (
-              <div key={block.id} className="rounded-3xl p-8 border border-white/15 bg-white/5 backdrop-blur-md text-center space-y-4">
-                <h3 className="text-xl font-bold font-display">{block.title}</h3>
-                {block.subtitle && <p className="text-xs opacity-75 max-w-md mx-auto">{block.subtitle}</p>}
+              <div key={block.id} className="border-2 border-black p-8 text-center space-y-4 bg-black text-white">
+                <h3 className="text-xl font-black uppercase font-display tracking-tight">{block.title}</h3>
+                {block.subtitle && <p className="text-xs text-slate-300 max-w-md mx-auto">{block.subtitle}</p>}
                 <div>
                   <a
-                    href={`https://t.me/${(theme.telegram || 'reseller').replace('@', '')}`}
+                    href={`https://t.me/${(theme.telegram || 'underbuy_admin').replace('@', '')}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#2AABEE] hover:bg-[#229ed9] text-white text-xs font-bold rounded-full shadow-lg transition-all"
+                    className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-black text-xs font-black uppercase tracking-wider hover:bg-slate-200 transition-colors"
                   >
                     <Send className="w-4 h-4" />
-                    <span>Написать в Telegram (@{(theme.telegram || 'reseller').replace('@', '')})</span>
+                    <span>Написать в Telegram (@{(theme.telegram || 'underbuy_admin').replace('@', '')})</span>
                   </a>
                 </div>
               </div>
@@ -420,47 +407,44 @@ export function ShopPage() {
       </main>
 
       {/* Footer Branding */}
-      <footer className="w-full py-8 text-center text-xs opacity-60 border-t border-white/10">
-        <p>© {new Date().getFullYear()} {shop.name}. Все права защищены.</p>
-        <p className="mt-1">Витрина создана на <Link to="/" className="underline font-bold text-white">Creatiwise Platform</Link></p>
+      <footer className="w-full py-8 text-center text-xs opacity-60 border-t border-slate-200 mt-12">
+        <p>© {new Date().getFullYear()} {logoText.toUpperCase()}. ВСЕ ПРАВА ЗАЩИЩЕНЫ.</p>
+        <p className="mt-1">Витрина создана на <Link to="/" className="underline font-bold text-black">Creatiwise Platform</Link></p>
       </footer>
 
-      {/* BUY / TELEGRAM ORDER MODAL */}
+      {/* PRODUCT ORDER MODAL */}
       {selectedProduct && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div
-            className="rounded-3xl border border-white/20 max-w-md w-full p-6 space-y-6 shadow-2xl relative animate-in fade-in zoom-in duration-200"
-            style={{ backgroundColor: theme.cardBg || '#12141d', color: theme.textColor || '#ffffff' }}
-          >
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border-2 border-black max-w-md w-full p-6 space-y-6 text-black relative animate-in fade-in zoom-in duration-200">
             <button
               onClick={() => setSelectedProduct(null)}
-              className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-white rounded-full bg-white/10"
+              className="absolute top-4 right-4 p-1.5 text-black hover:bg-slate-100 rounded-none border border-black"
             >
               <X className="w-5 h-5" />
             </button>
 
             {/* Modal Content */}
             <div className="space-y-4">
-              <div className="h-56 rounded-2xl overflow-hidden bg-slate-900">
-                <img src={selectedProduct.image_url} alt={selectedProduct.title} className="w-full h-full object-cover" />
+              <div className="h-64 overflow-hidden bg-slate-50 flex items-center justify-center p-2 border border-slate-200">
+                <img src={selectedProduct.image_url} alt={selectedProduct.title} className="max-h-full max-w-full object-contain" />
               </div>
 
               <div>
                 {selectedProduct.brand && (
-                  <span className="text-xs font-bold text-blue-400 uppercase tracking-wider">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
                     {selectedProduct.brand}
                   </span>
                 )}
-                <h3 className="text-xl font-bold font-display leading-tight">{selectedProduct.title}</h3>
-                <div className="text-2xl font-black mt-1" style={{ color: theme.primaryColor || '#0066ff' }}>
-                  {selectedProduct.price.toLocaleString('ru-RU')} ₽
+                <h3 className="text-lg font-black uppercase font-display leading-tight">{selectedProduct.title}</h3>
+                <div className="text-2xl font-black mt-2 font-display">
+                  {selectedProduct.price.toLocaleString('ru-RU')} {currencySymbol}
                 </div>
               </div>
 
               {/* Size Selector */}
               {selectedProduct.size && (
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold opacity-80 block">Выберите размер:</label>
+                  <label className="text-xs font-extrabold uppercase tracking-wider block">Выберите размер:</label>
                   <div className="flex flex-wrap gap-2">
                     {selectedProduct.size.split(',').map((sz) => {
                       const cleanSize = sz.trim()
@@ -469,10 +453,10 @@ export function ShopPage() {
                         <button
                           key={cleanSize}
                           onClick={() => setSelectedSize(cleanSize)}
-                          className={`px-3.5 py-1.5 text-xs font-bold rounded-xl border transition-all ${
+                          className={`px-4 py-2 text-xs font-bold border-2 transition-all ${
                             isSelected
-                              ? 'bg-white text-black border-white shadow-md'
-                              : 'bg-white/5 text-white border-white/20 hover:bg-white/10'
+                              ? 'bg-black text-white border-black shadow-md'
+                              : 'bg-white text-black border-slate-300 hover:border-black'
                           }`}
                         >
                           {cleanSize}
@@ -486,27 +470,13 @@ export function ShopPage() {
 
             {/* Direct Telegram Order Button */}
             <div className="space-y-3 pt-2">
-              <label className="text-xs font-semibold opacity-80 block">
-                Заказ перенаправит напрямую продавцу в Telegram:
-              </label>
-
               <button
                 onClick={handleTelegramOrder}
-                className="w-full flex items-center justify-center gap-2 py-3.5 px-4 bg-[#2AABEE] hover:bg-[#229ed9] text-white text-xs sm:text-sm font-bold rounded-2xl shadow-xl transition-all"
+                className="w-full flex items-center justify-center gap-2 py-4 px-4 bg-black text-white text-xs font-black uppercase tracking-wider hover:bg-slate-800 transition-all border border-black shadow-lg"
               >
                 <Send className="w-4 h-4" />
-                <span>Купить в Telegram (@{(theme.telegram || 'seller').replace('@', '')})</span>
+                <span>Купить в Telegram (@{(theme.telegram || 'underbuy_admin').replace('@', '')})</span>
               </button>
-
-              {theme.whatsapp && (
-                <button
-                  onClick={handleWhatsAppOrder}
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs font-bold rounded-2xl shadow-lg transition-all"
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  <span>Купить в WhatsApp</span>
-                </button>
-              )}
             </div>
 
           </div>

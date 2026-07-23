@@ -20,9 +20,9 @@ import {
   Wand2,
   Copy as CopyIcon,
   Settings,
-  LayoutGrid,
-  Columns,
-  Maximize2
+  Image as ImageIcon,
+  Heart,
+  Type
 } from 'lucide-react'
 import { useStore, BLOCK_LIBRARY, LAYOUT_PRESETS } from '../store/useStore'
 
@@ -42,7 +42,7 @@ export function AdminPage() {
     deleteProduct
   } = useStore()
 
-  const [activeTab, setActiveTab] = useState('builder') // 'builder' | 'presets' | 'products' | 'telegram'
+  const [activeTab, setActiveTab] = useState('builder') // 'builder' | 'presets' | 'branding' | 'products' | 'telegram'
   const [showAddBlockModal, setShowAddBlockModal] = useState(false)
   const [insertIndex, setInsertIndex] = useState(null)
 
@@ -64,10 +64,11 @@ export function AdminPage() {
   const [prodForm, setProdForm] = useState({
     title: '',
     price: '',
+    oldPrice: '',
     size: 'S, M, L',
-    category: 'Одежда',
+    category: 'СУМКИ',
     brand: '',
-    image_url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80',
+    image_url: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80',
     is_available: true
   })
 
@@ -79,7 +80,7 @@ export function AdminPage() {
     telegram: ''
   })
 
-  // Theme Form State
+  // Theme & Branding Form State
   const [themeForm, setThemeForm] = useState(
     activeShop?.theme_config || LAYOUT_PRESETS[0].config
   )
@@ -164,8 +165,9 @@ export function AdminPage() {
       setProdForm({
         title: product.title,
         price: product.price,
+        oldPrice: product.oldPrice || '',
         size: product.size || '',
-        category: product.category || 'Одежда',
+        category: product.category || 'СУМКИ',
         brand: product.brand || '',
         image_url: product.image_url || '',
         is_available: product.is_available
@@ -175,10 +177,11 @@ export function AdminPage() {
       setProdForm({
         title: '',
         price: '',
+        oldPrice: '',
         size: 'S, M, L',
-        category: 'Одежда',
-        brand: 'Nike',
-        image_url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80',
+        category: 'СУМКИ',
+        brand: 'Y-3',
+        image_url: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80',
         is_available: true
       })
     }
@@ -192,13 +195,15 @@ export function AdminPage() {
     if (editingProduct) {
       updateProduct(editingProduct.id, {
         ...prodForm,
-        price: parseFloat(prodForm.price) || 0
+        price: parseFloat(prodForm.price) || 0,
+        oldPrice: prodForm.oldPrice ? parseFloat(prodForm.oldPrice) : null
       })
     } else {
       addProduct({
         shop_id: activeShop.id,
         title: prodForm.title,
         price: parseFloat(prodForm.price) || 0,
+        oldPrice: prodForm.oldPrice ? parseFloat(prodForm.oldPrice) : null,
         size: prodForm.size,
         category: prodForm.category,
         brand: prodForm.brand,
@@ -216,7 +221,7 @@ export function AdminPage() {
     const updatedTheme = { ...themeForm, telegram: cleanTg }
     updateShop(activeShop.id, { theme_config: updatedTheme })
     setThemeForm(updatedTheme)
-    alert('Настройки Telegram сохранены!')
+    alert('Настройки брендинга и логотипа сохранены!')
   }
 
   const handleCreateShop = (e) => {
@@ -249,14 +254,14 @@ export function AdminPage() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center font-bold text-white shadow-md">
-              <Store className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-xl bg-black border border-slate-700 flex items-center justify-center font-black text-white text-lg shadow-md font-display">
+              UB
             </div>
             <div>
               <h1 className="text-xl font-bold font-display text-white flex items-center gap-2">
-                <span>Конструктор Витрин (Tilda-Style)</span>
+                <span>Конструктор Витрины Underbuy Style</span>
               </h1>
-              <p className="text-xs text-slate-400">Полный контроль над сеткой блоков, стилем каталога и дизайна</p>
+              <p className="text-xs text-slate-400">Настройка логотипа, сетки блоков, сердечек и карточек товаров</p>
             </div>
           </div>
 
@@ -309,7 +314,7 @@ export function AdminPage() {
             <div className="space-y-1">
               <div className="text-xs text-blue-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
                 <Sparkles className="w-4 h-4" />
-                <span>Ссылка на готовую витрину:</span>
+                <span>Ссылка на вашу витрину в стиле Underbuy:</span>
               </div>
               <div className="text-sm font-mono font-bold text-white">
                 {window.location.origin}{window.location.pathname}#/s/{activeShop.slug}
@@ -352,6 +357,18 @@ export function AdminPage() {
           </button>
 
           <button
+            onClick={() => setActiveTab('branding')}
+            className={`pb-4 px-2 text-sm font-bold flex items-center gap-2 border-b-2 whitespace-nowrap transition-colors ${
+              activeTab === 'branding'
+                ? 'border-blue-500 text-blue-400'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Type className="w-4 h-4" />
+            <span>Логотип и Настройки Шапки</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('presets')}
             className={`pb-4 px-2 text-sm font-bold flex items-center gap-2 border-b-2 whitespace-nowrap transition-colors ${
               activeTab === 'presets'
@@ -360,7 +377,7 @@ export function AdminPage() {
             }`}
           >
             <Wand2 className="w-4 h-4" />
-            <span>Дизайны и Сетки Брендов</span>
+            <span>Стиль Underbuy и Пресеты</span>
           </button>
 
           <button
@@ -388,13 +405,13 @@ export function AdminPage() {
           </button>
         </div>
 
-        {/* TAB 1: WYSIWYG VISUAL PAGE BUILDER */}
+        {/* TAB 1: VISUAL BUILDER */}
         {activeTab === 'builder' && (
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 p-4 rounded-2xl border border-slate-800">
               <div>
-                <h2 className="text-lg font-bold text-white">Интерактивный холст витрины</h2>
-                <p className="text-xs text-slate-400">Нажимайте на блоки для изменения стиля, параметров сетки, текста и карточек</p>
+                <h2 className="text-lg font-bold text-white">Интерактивный конструктор витрины</h2>
+                <p className="text-xs text-slate-400">Передвигайте блоки, настраивайте колонки карточек и рамочные фильтры Underbuy</p>
               </div>
 
               <button
@@ -402,24 +419,21 @@ export function AdminPage() {
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl shadow-md transition-all"
               >
                 <Plus className="w-4 h-4" />
-                <span>Добавить блок в витрину</span>
+                <span>Добавить блок</span>
               </button>
             </div>
 
-            {/* Visual Builder Canvas */}
             <div className="space-y-4 max-w-4xl mx-auto">
               {activeBlocks.map((block, idx) => (
                 <React.Fragment key={block.id}>
                   
-                  {/* Block Canvas Card */}
                   <div className="group relative bg-slate-900 border-2 border-slate-800 hover:border-blue-500/60 rounded-3xl p-6 transition-all shadow-xl">
                     
-                    {/* Floating Controls Toolbar */}
                     <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-slate-950/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-slate-700 shadow-md opacity-95">
                       <button
                         onClick={() => handleOpenEditBlock(block)}
                         className="p-1.5 text-blue-400 hover:text-white rounded-lg transition-colors flex items-center gap-1 text-xs font-bold"
-                        title="Настроить стиль и параметры"
+                        title="Настроить стиль"
                       >
                         <Settings className="w-3.5 h-3.5" />
                         <span>Настроить</span>
@@ -427,99 +441,63 @@ export function AdminPage() {
 
                       <span className="w-px h-4 bg-slate-800"></span>
 
-                      <button
-                        onClick={() => moveBlock(idx, -1)}
-                        disabled={idx === 0}
-                        className="p-1.5 text-slate-400 hover:text-white disabled:opacity-30 rounded-lg"
-                        title="Вверх"
-                      >
+                      <button onClick={() => moveBlock(idx, -1)} disabled={idx === 0} className="p-1.5 text-slate-400 hover:text-white disabled:opacity-30 rounded-lg">
                         <ArrowUp className="w-3.5 h-3.5" />
                       </button>
-
-                      <button
-                        onClick={() => moveBlock(idx, 1)}
-                        disabled={idx === activeBlocks.length - 1}
-                        className="p-1.5 text-slate-400 hover:text-white disabled:opacity-30 rounded-lg"
-                        title="Вниз"
-                      >
+                      <button onClick={() => moveBlock(idx, 1)} disabled={idx === activeBlocks.length - 1} className="p-1.5 text-slate-400 hover:text-white disabled:opacity-30 rounded-lg">
                         <ArrowDown className="w-3.5 h-3.5" />
                       </button>
-
-                      <button
-                        onClick={() => duplicateBlock(idx)}
-                        className="p-1.5 text-slate-400 hover:text-white rounded-lg"
-                        title="Дублировать блок"
-                      >
+                      <button onClick={() => duplicateBlock(idx)} className="p-1.5 text-slate-400 hover:text-white rounded-lg">
                         <CopyIcon className="w-3.5 h-3.5" />
                       </button>
-
-                      <button
-                        onClick={() => deleteBlock(block.id)}
-                        className="p-1.5 text-red-400 hover:text-red-300 rounded-lg"
-                        title="Удалить блок"
-                      >
+                      <button onClick={() => deleteBlock(block.id)} className="p-1.5 text-red-400 hover:text-red-300 rounded-lg">
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
 
-                    {/* Block Preview Content */}
                     <div className="space-y-2 pr-36">
                       <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-blue-600/20 text-blue-400 text-[10px] font-bold uppercase tracking-wider">
                         Блок #{idx + 1}: {block.type}
                       </div>
 
-                      {block.type === 'banner' && (
-                        <div className="space-y-1">
-                          <h3 className="text-xl font-extrabold text-white">{block.title}</h3>
-                          <p className="text-xs text-slate-400">{block.subtitle}</p>
-                          {block.imageUrl && (
-                            <img src={block.imageUrl} alt="" className="w-full h-32 object-cover rounded-xl mt-2" />
-                          )}
-                        </div>
-                      )}
-
                       {block.type === 'categories' && (
-                        <div className="text-xs text-slate-300 space-y-1">
-                          <div className="font-bold text-white">Чипсы категорий, фильтр брендов и поисковая строка</div>
-                          <div className="text-[11px] text-slate-500">Стиль чипсов: {block.chipStyle || 'pill'}</div>
+                        <div className="space-y-2 pt-1">
+                          <div className="font-bold text-white text-sm">Рамочные фильтры [ ВСЕ v ] [ ВСЕ БРЕНДЫ v ]</div>
+                          <div className="flex gap-3">
+                            <div className="border-2 border-slate-700 bg-slate-950 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-300 flex justify-between items-center w-36">
+                              <span>ВСЕ</span> <span>v</span>
+                            </div>
+                            <div className="border-2 border-slate-700 bg-slate-950 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-300 flex justify-between items-center w-40">
+                              <span>ВСЕ БРЕНДЫ</span> <span>v</span>
+                            </div>
+                          </div>
                         </div>
                       )}
 
                       {block.type === 'products' && (
-                        <div className="space-y-2">
+                        <div className="space-y-3 pt-1">
                           <div className="flex items-center justify-between">
-                            <h3 className="text-lg font-bold text-white">{block.title || 'Сетка товаров'}</h3>
-                            <span className="text-xs font-bold text-blue-400">
-                              Сетка: {block.columns || 3} Колонки | Стиль: {block.cardStyle || 'modern'}
-                            </span>
+                            <h3 className="text-base font-bold text-white">Сетка каталога ({block.columns || 2} Колонки | Стиль: {block.cardStyle || 'underbuy'})</h3>
                           </div>
-                          {/* Mini Grid representation */}
-                          <div className={`grid gap-2 pt-2 ${block.columns === 2 ? 'grid-cols-2' : block.columns === 4 ? 'grid-cols-4' : 'grid-cols-3'}`}>
-                            {shopProducts.slice(0, block.columns || 3).map((p) => (
-                              <div key={p.id} className="bg-slate-800 p-2 rounded-xl text-[10px] border border-slate-700">
-                                <img src={p.image_url} alt="" className="w-full h-12 object-cover rounded mb-1" />
-                                <div className="font-bold line-clamp-1">{p.title}</div>
-                                <div className="text-blue-400 font-bold">{p.price} ₽</div>
+                          <div className="grid grid-cols-2 gap-3">
+                            {shopProducts.slice(0, 2).map((p) => (
+                              <div key={p.id} className="bg-white text-black p-3 border border-slate-300 rounded-none relative space-y-1">
+                                <Heart className="w-4 h-4 absolute top-2 right-2 text-black" />
+                                <img src={p.image_url} alt="" className="w-full h-24 object-cover mb-2" />
+                                <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">{p.brand}</div>
+                                <div className="text-[11px] font-extrabold uppercase leading-tight line-clamp-1">{p.title}</div>
+                                <div className="text-sm font-black pt-1">{p.price} ₽</div>
+                                <div className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">{p.category}</div>
                               </div>
                             ))}
                           </div>
                         </div>
                       )}
 
-                      {block.type === 'promo' && (
+                      {block.type === 'banner' && (
                         <div className="space-y-1">
-                          <h3 className="text-lg font-bold text-white">{block.title}</h3>
+                          <h3 className="text-lg font-extrabold text-white">{block.title}</h3>
                           <p className="text-xs text-slate-400">{block.subtitle}</p>
-                          {block.imageUrl && (
-                            <img src={block.imageUrl} alt="" className="w-full h-28 object-cover rounded-xl mt-2" />
-                          )}
-                        </div>
-                      )}
-
-                      {block.type === 'text_note' && (
-                        <div className="space-y-1">
-                          <h3 className="text-base font-bold text-white">{block.title}</h3>
-                          <p className="text-xs text-slate-300 italic">{block.text}</p>
                         </div>
                       )}
 
@@ -533,7 +511,6 @@ export function AdminPage() {
 
                   </div>
 
-                  {/* Add Block Button between Blocks */}
                   <div className="flex justify-center my-2">
                     <button
                       onClick={() => handleOpenAddBlockModal(idx)}
@@ -550,12 +527,72 @@ export function AdminPage() {
           </div>
         )}
 
-        {/* TAB 2: BRAND LAYOUT PRESETS */}
+        {/* TAB 2: BRANDING & LOGO EDITOR */}
+        {activeTab === 'branding' && (
+          <form onSubmit={handleSaveShopTheme} className="bg-slate-900 p-6 rounded-3xl border border-slate-800 space-y-6 max-w-2xl">
+            <div>
+              <h2 className="text-xl font-bold text-white font-display">Настройка Логотипа и Шапки Витрины</h2>
+              <p className="text-xs text-slate-400">Настройте отображение вашего логотипа (текст или картинка)</p>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  Текст логотипа (как "under buy" на скриншоте)
+                </label>
+                <input
+                  type="text"
+                  value={themeForm.logoText || activeShop?.name}
+                  onChange={(e) => setThemeForm({ ...themeForm, logoText: e.target.value })}
+                  className="bg-slate-950 border border-slate-700 text-sm text-white font-bold rounded-xl px-4 py-3 w-full font-display"
+                  placeholder="under buy"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  ИЛИ Картинка Логотипа (URL файла логотипа)
+                </label>
+                <input
+                  type="url"
+                  value={themeForm.logoUrl || ''}
+                  onChange={(e) => setThemeForm({ ...themeForm, logoUrl: e.target.value })}
+                  className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                  placeholder="https://images.unsplash.com/..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Валюта каталога</label>
+                <select
+                  value={themeForm.currencySymbol || '₽'}
+                  onChange={(e) => setThemeForm({ ...themeForm, currencySymbol: e.target.value })}
+                  className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                >
+                  <option value="₽">Рубль (₽)</option>
+                  <option value="₾">Лари (₾)</option>
+                  <option value="$">Доллар ($)</option>
+                  <option value="€">Евро (€)</option>
+                </select>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
+            >
+              <Save className="w-4 h-4" />
+              <span>Сохранить настройки логотипа</span>
+            </button>
+          </form>
+        )}
+
+        {/* TAB 3: BRAND PRESETS */}
         {activeTab === 'presets' && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-bold text-white">Готовые концепции дизайна и сеток каталогов</h2>
-              <p className="text-xs text-slate-400">Выберите готовый стиль сетки (2 колонки, 3 колонки, Balenciaga, Supreme, Apple) без потери ваших товаров</p>
+              <h2 className="text-xl font-bold text-white">Готовые пресеты визуального оформления</h2>
+              <p className="text-xs text-slate-400">Применяйте готовые концепции дизайна к своему магазину</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -569,24 +606,17 @@ export function AdminPage() {
                       <h3 className="text-lg font-bold text-white font-display">{preset.name}</h3>
                     </div>
                     <p className="text-xs text-slate-400 leading-relaxed">{preset.desc}</p>
-
-                    <div className="flex items-center gap-2 pt-2 border-t border-slate-800">
-                      <span className="text-xs text-slate-400">Палитра концепции:</span>
-                      <span className="w-5 h-5 rounded-full border border-white/20" style={{ backgroundColor: preset.config.backgroundColor }}></span>
-                      <span className="w-5 h-5 rounded-full border border-white/20" style={{ backgroundColor: preset.config.cardBg }}></span>
-                      <span className="w-5 h-5 rounded-full border border-white/20" style={{ backgroundColor: preset.config.primaryColor }}></span>
-                    </div>
                   </div>
 
                   <button
                     onClick={() => {
                       applyPresetToShop(activeShop.id, preset.id)
-                      alert(`Дизайн и сетка "${preset.name}" применены к вашей витрине!`)
+                      alert(`Дизайн "${preset.name}" применен к вашей витрине!`)
                     }}
                     className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2"
                   >
                     <Wand2 className="w-4 h-4" />
-                    <span>Применить этот концепт дизайна</span>
+                    <span>Применить этот пресет</span>
                   </button>
                 </div>
               ))}
@@ -594,13 +624,13 @@ export function AdminPage() {
           </div>
         )}
 
-        {/* TAB 3: PRODUCTS MANAGEMENT */}
+        {/* TAB 4: PRODUCTS MANAGEMENT */}
         {activeTab === 'products' && (
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h2 className="text-xl font-bold text-white">Управление товарами магазина "{activeShop?.name}"</h2>
-                <p className="text-xs text-slate-400">Добавляйте свои наименования, цены, фотки, категории и размеры</p>
+                <p className="text-xs text-slate-400">Добавляйте свои наименования, цены, старые цены, фотки, категории и размеры</p>
               </div>
 
               <button
@@ -655,17 +685,24 @@ export function AdminPage() {
 
                       <div className="p-4 space-y-2">
                         <div className="text-[11px] text-blue-400 font-semibold uppercase tracking-wider">
-                          {prod.category || 'Одежда'}
+                          {prod.category || 'СУМКИ'}
                         </div>
 
-                        <h3 className="font-bold text-white text-base leading-snug line-clamp-1">
+                        <h3 className="font-bold text-white text-base leading-snug line-clamp-1 uppercase">
                           {prod.title}
                         </h3>
 
                         <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
-                          <span className="font-extrabold text-white text-base font-display">
-                            {prod.price.toLocaleString('ru-RU')} ₽
-                          </span>
+                          <div className="flex items-baseline gap-2">
+                            <span className="font-extrabold text-white text-base font-display">
+                              {prod.price.toLocaleString('ru-RU')} ₽
+                            </span>
+                            {prod.oldPrice && (
+                              <span className="line-through text-slate-500 text-xs">
+                                {prod.oldPrice.toLocaleString('ru-RU')} ₽
+                              </span>
+                            )}
+                          </div>
                           {prod.size && (
                             <span className="bg-slate-800 px-2 py-0.5 rounded text-[11px] text-slate-300">
                               {prod.size}
@@ -676,22 +713,10 @@ export function AdminPage() {
                     </div>
 
                     <div className="p-4 pt-0 flex items-center justify-end gap-2 border-t border-slate-800 mt-2">
-                      <button
-                        onClick={() => handleOpenProductModal(prod)}
-                        className="p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-800 rounded-lg transition-colors"
-                        title="Редактировать"
-                      >
+                      <button onClick={() => handleOpenProductModal(prod)} className="p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-800 rounded-lg">
                         <Edit className="w-4 h-4" />
                       </button>
-                      <button
-                        onClick={() => {
-                          if (window.confirm(`Удалить "${prod.title}"?`)) {
-                            deleteProduct(prod.id)
-                          }
-                        }}
-                        className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors"
-                        title="Удалить"
-                      >
+                      <button onClick={() => deleteProduct(prod.id)} className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -702,12 +727,12 @@ export function AdminPage() {
           </div>
         )}
 
-        {/* TAB 4: TELEGRAM CONFIGURATION */}
+        {/* TAB 5: TELEGRAM CONFIGURATION */}
         {activeTab === 'telegram' && (
           <form onSubmit={handleSaveShopTheme} className="bg-slate-900 p-6 rounded-3xl border border-slate-800 space-y-6 max-w-2xl">
             <div>
               <h2 className="text-xl font-bold text-white">Прием заказов в Telegram</h2>
-              <p className="text-xs text-slate-400">Укажите ваш Telegram юзернейм для моментального приёма заявок</p>
+              <p className="text-xs text-slate-400">Укажите ваш Telegram юзернейм для приема сообщений</p>
             </div>
 
             <div className="bg-blue-600/10 border border-blue-500/40 p-4 rounded-2xl space-y-2">
@@ -732,7 +757,7 @@ export function AdminPage() {
 
             <button
               type="submit"
-              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition-all shadow-md"
+              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl shadow-md transition-all"
             >
               <Save className="w-4 h-4" />
               <span>Сохранить юзернейм Telegram</span>
@@ -742,10 +767,10 @@ export function AdminPage() {
 
       </div>
 
-      {/* ADD BLOCK LIBRARY MODAL */}
+      {/* ADD BLOCK MODAL */}
       {showAddBlockModal && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 space-y-6 shadow-2xl relative animate-in fade-in zoom-in duration-200">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 space-y-6 shadow-2xl relative">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-white font-display">Библиотека Блоков</h3>
               <button onClick={() => setShowAddBlockModal(false)} className="p-1 text-slate-400 hover:text-white">
@@ -780,7 +805,7 @@ export function AdminPage() {
           <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl relative">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-white font-display">
-                Настройка стиля блока [{editingBlock.type}]
+                Настройка блока [{editingBlock.type}]
               </h3>
               <button onClick={() => setEditingBlock(null)} className="p-1 text-slate-400 hover:text-white">
                 <X className="w-5 h-5" />
@@ -788,50 +813,24 @@ export function AdminPage() {
             </div>
 
             <form onSubmit={handleSaveBlockProps} className="space-y-4">
-              {/* Title Input */}
-              {editingBlock.title !== undefined && (
+              {editingBlock.type === 'categories' && (
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Заголовок блока</label>
-                  <input
-                    type="text"
-                    value={blockPropsForm.title || ''}
-                    onChange={(e) => setBlockPropsForm({ ...blockPropsForm, title: e.target.value })}
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Стиль фильтров</label>
+                  <select
+                    value={blockPropsForm.filterStyle || 'underbuy_dropdowns'}
+                    onChange={(e) => setBlockPropsForm({ ...blockPropsForm, filterStyle: e.target.value })}
                     className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
-                  />
+                  >
+                    <option value="underbuy_dropdowns">Underbuy Рамочные выпадающие меню [ ВСЕ v ] [ ВСЕ БРЕНДЫ v ]</option>
+                    <option value="pill">Округлые чипсы (Pills)</option>
+                  </select>
                 </div>
               )}
 
-              {/* Subtitle Input */}
-              {editingBlock.subtitle !== undefined && (
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Подзаголовок / Описание</label>
-                  <input
-                    type="text"
-                    value={blockPropsForm.subtitle || ''}
-                    onChange={(e) => setBlockPropsForm({ ...blockPropsForm, subtitle: e.target.value })}
-                    className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
-                  />
-                </div>
-              )}
-
-              {/* Image URL Input */}
-              {editingBlock.imageUrl !== undefined && (
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">URL Изображения</label>
-                  <input
-                    type="url"
-                    value={blockPropsForm.imageUrl || ''}
-                    onChange={(e) => setBlockPropsForm({ ...blockPropsForm, imageUrl: e.target.value })}
-                    className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
-                  />
-                </div>
-              )}
-
-              {/* Columns Count for Products Grid */}
               {editingBlock.type === 'products' && (
-                <div className="space-y-3 pt-2">
+                <div className="space-y-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">Количество колонок в сетке</label>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">Количество колонок</label>
                     <div className="grid grid-cols-3 gap-2">
                       {[2, 3, 4].map((num) => (
                         <button
@@ -839,7 +838,7 @@ export function AdminPage() {
                           type="button"
                           onClick={() => setBlockPropsForm({ ...blockPropsForm, columns: num })}
                           className={`py-2 text-xs font-bold rounded-xl border transition-all ${
-                            (blockPropsForm.columns || 3) === num
+                            (blockPropsForm.columns || 2) === num
                               ? 'bg-blue-600 text-white border-blue-500'
                               : 'bg-slate-950 text-slate-400 border-slate-800'
                           }`}
@@ -853,31 +852,35 @@ export function AdminPage() {
                   <div>
                     <label className="block text-xs font-semibold text-slate-300 mb-1">Стиль карточек товаров</label>
                     <select
-                      value={blockPropsForm.cardStyle || 'modern'}
+                      value={blockPropsForm.cardStyle || 'underbuy'}
                       onChange={(e) => setBlockPropsForm({ ...blockPropsForm, cardStyle: e.target.value })}
                       className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
                     >
-                      <option value="modern">Современный с тенью (Modern)</option>
-                      <option value="minimal">Минималистичный (Minimal)</option>
-                      <option value="glass">Стеклянный с размытием (Glassmorphism)</option>
-                      <option value="border">Строгая рамка (Border / High Fashion)</option>
+                      <option value="underbuy">Underbuy (Заглавный бренд, название, сердечко, цена)</option>
+                      <option value="modern">Modern (С тенью и скруглением)</option>
+                      <option value="glass">Glassmorphism (Стеклянный)</option>
                     </select>
                   </div>
                 </div>
               )}
 
+              {editingBlock.title !== undefined && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Заголовок блока</label>
+                  <input
+                    type="text"
+                    value={blockPropsForm.title || ''}
+                    onChange={(e) => setBlockPropsForm({ ...blockPropsForm, title: e.target.value })}
+                    className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
+                  />
+                </div>
+              )}
+
               <div className="pt-2 flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setEditingBlock(null)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800 rounded-xl"
-                >
+                <button type="button" onClick={() => setEditingBlock(null)} className="px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800 rounded-xl">
                   Отмена
                 </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-md"
-                >
+                <button type="submit" className="px-5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-md">
                   Сохранить
                 </button>
               </div>
@@ -908,24 +911,20 @@ export function AdminPage() {
                   value={prodForm.title}
                   onChange={(e) => setProdForm({ ...prodForm, title: e.target.value })}
                   className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
-                  placeholder="Например: Supreme Box Logo Hoodie"
+                  placeholder="ENFANTS RICHES DEPRIMES TOTE BAG"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1">Категория</label>
-                  <select
+                  <input
+                    type="text"
                     value={prodForm.category}
                     onChange={(e) => setProdForm({ ...prodForm, category: e.target.value })}
-                    className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
-                  >
-                    <option value="Одежда">Одежда</option>
-                    <option value="Обувь">Обувь</option>
-                    <option value="Аксессуары">Аксессуары</option>
-                    <option value="Электроника">Электроника</option>
-                    <option value="Другое">Другое</option>
-                  </select>
+                    className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full font-mono uppercase"
+                    placeholder="СУМКИ, ОДЕЖДА..."
+                  />
                 </div>
 
                 <div>
@@ -934,8 +933,8 @@ export function AdminPage() {
                     type="text"
                     value={prodForm.brand}
                     onChange={(e) => setProdForm({ ...prodForm, brand: e.target.value })}
-                    className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
-                    placeholder="Nike, Supreme..."
+                    className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full uppercase"
+                    placeholder="ENFANTS RICHES DEPRIMES, Y-3..."
                   />
                 </div>
               </div>
@@ -949,18 +948,18 @@ export function AdminPage() {
                     value={prodForm.price}
                     onChange={(e) => setProdForm({ ...prodForm, price: e.target.value })}
                     className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
-                    placeholder="4900"
+                    placeholder="6500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Доступные размеры</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Старая цена (зачеркнутая)</label>
                   <input
-                    type="text"
-                    value={prodForm.size}
-                    onChange={(e) => setProdForm({ ...prodForm, size: e.target.value })}
+                    type="number"
+                    value={prodForm.oldPrice}
+                    onChange={(e) => setProdForm({ ...prodForm, oldPrice: e.target.value })}
                     className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
-                    placeholder="S, M, L, XL"
+                    placeholder="8900"
                   />
                 </div>
               </div>
@@ -977,31 +976,11 @@ export function AdminPage() {
                 />
               </div>
 
-              <div className="flex items-center gap-2 pt-2">
-                <input
-                  type="checkbox"
-                  id="avail"
-                  checked={prodForm.is_available}
-                  onChange={(e) => setProdForm({ ...prodForm, is_available: e.target.checked })}
-                  className="w-4 h-4 rounded text-blue-600 bg-slate-950 border-slate-700"
-                />
-                <label htmlFor="avail" className="text-xs font-medium text-slate-300">
-                  Товар в наличии в магазине
-                </label>
-              </div>
-
               <div className="pt-4 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowProductModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800 rounded-xl"
-                >
+                <button type="button" onClick={() => setShowProductModal(false)} className="px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800 rounded-xl">
                   Отмена
                 </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-md"
-                >
+                <button type="submit" className="px-5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-md">
                   Сохранить товар
                 </button>
               </div>
@@ -1015,7 +994,7 @@ export function AdminPage() {
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 space-y-6 shadow-2xl relative">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white font-display">Создать витрину за 1 минуту</h3>
+              <h3 className="text-lg font-bold text-white font-display">Создать витрину в стиле Underbuy</h3>
               <button onClick={() => setShowShopModal(false)} className="p-1 text-slate-400 hover:text-white">
                 <X className="w-5 h-5" />
               </button>
@@ -1023,14 +1002,14 @@ export function AdminPage() {
 
             <form onSubmit={handleCreateShop} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Название магазина</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Название магазина / Текст логотипа</label>
                 <input
                   type="text"
                   required
                   value={shopForm.name}
                   onChange={(e) => setShopForm({ ...shopForm, name: e.target.value })}
                   className="bg-slate-950 border border-slate-700 text-xs text-white rounded-xl px-3 py-2.5 w-full"
-                  placeholder="Например: Streetwear Lab"
+                  placeholder="under buy"
                 />
               </div>
 
@@ -1046,7 +1025,7 @@ export function AdminPage() {
                     value={shopForm.slug}
                     onChange={(e) => setShopForm({ ...shopForm, slug: e.target.value })}
                     className="bg-slate-950 border border-slate-700 text-xs text-white rounded-r-xl px-3 py-2.5 flex-1 font-mono"
-                    placeholder="streetwear-lab"
+                    placeholder="under-buy"
                   />
                 </div>
               </div>
@@ -1066,23 +1045,16 @@ export function AdminPage() {
                     value={shopForm.telegram}
                     onChange={(e) => setShopForm({ ...shopForm, telegram: e.target.value })}
                     className="bg-slate-950 border border-slate-700 text-xs text-white rounded-r-xl px-3 py-2.5 flex-1 font-semibold"
-                    placeholder="your_telegram_username"
+                    placeholder="underbuy_admin"
                   />
                 </div>
               </div>
 
               <div className="pt-4 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowShopModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800 rounded-xl"
-                >
+                <button type="button" onClick={() => setShowShopModal(false)} className="px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800 rounded-xl">
                   Отмена
                 </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-md"
-                >
+                <button type="submit" className="px-5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-md">
                   Создать витрину
                 </button>
               </div>
